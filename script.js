@@ -1,52 +1,55 @@
-// La liste est vide car aucun candidat n'est encore inscrit
+// Liste des candidats (actuellement vide)
 const candidats = [];
 
 // Éléments du DOM
 const btnVoter = document.getElementById("btn-voter");
-const btnRetour = document.getElementById("btn-retour");
 const sectionFormulaire = document.getElementById("section-formulaire-vote");
-const candidatsContainer = document.getElementById("candidats-container");
+
+const etape1 = document.getElementById("etape-1-infos");
+const etape2 = document.getElementById("etape-2-candidats");
+
+const btnVersEtape2 = document.getElementById("btn-vers-etape-2");
+const btnRetourEtape1 = document.getElementById("btn-retour-etape-1");
+const btnRetourAccueil = document.getElementById("btn-retour-accueil");
+
 const radioCandidatsContainer = document.getElementById("radio-candidats-container");
-const voteForm = document.getElementById("vote-form");
+const formEtape2 = document.getElementById("form-etape-2");
 const voteMessage = document.getElementById("vote-message");
 
-// Lancement au chargement de la page
-document.addEventListener("DOMContentLoaded", () => {
-  if (candidatsContainer) afficherCandidatsAccueil();
-  if (radioCandidatsContainer) afficherCandidatsFormulaire();
-});
+// Calcul de l'âge (15 à 40 ans)
+function calculerAge(dateNaissance) {
+  const aujourdhui = new Date();
+  const dateNaissanceObj = new Date(dateNaissance);
+  let age = aujourdhui.getFullYear() - dateNaissanceObj.getFullYear();
+  const moisDiff = aujourdhui.getMonth() - dateNaissanceObj.getMonth();
 
-// 1. Afficher sur la page d'accueil
-function afficherCandidatsAccueil() {
-  candidatsContainer.innerHTML = "";
-  
-  if (candidats.length === 0) {
-    // Affiche ton message s'il n'y a pas de candidat
-    candidatsContainer.innerHTML = "<p style='text-align: center; font-style: italic; color: #64748b; padding: 10px;'>Pas de candidat inscrit pour le moment</p>";
-    return;
+  if (moisDiff < 0 || (moisDiff === 0 && aujourdhui.getDate() < dateNaissanceObj.getDate())) {
+    age--;
   }
-
-  // (Le code pour afficher les candidats plus tard restera ici en attente)
-  candidats.forEach(candidat => {
-    const card = document.createElement("div");
-    card.className = "candidat-card";
-    card.innerHTML = `
-      <div class="candidat-avatar">👤</div>
-      <div class="candidat-info">
-        <h4>${candidat.numero} — ${candidat.nom}</h4>
-      </div>
-    `;
-    candidatsContainer.appendChild(card);
-  });
+  return age;
 }
 
-// 2. Afficher dans le formulaire de vote
-function afficherCandidatsFormulaire() {
+// Affichage du message d'erreur ou succès
+function afficherMessage(message, type) {
+  voteMessage.textContent = message;
+  voteMessage.className = `message-box ${type}`;
+  voteMessage.classList.remove("hidden");
+}
+
+function masquerMessage() {
+  voteMessage.classList.add("hidden");
+}
+
+// Affichage dynamique des candidats à l'étape 2
+function chargerCandidats() {
   radioCandidatsContainer.innerHTML = "";
-  
+
   if (candidats.length === 0) {
-    // Affiche ton message dans le formulaire
-    radioCandidatsContainer.innerHTML = "<p style='font-style: italic; color: #64748b;'>Pas de candidat inscrit pour le moment</p>";
+    radioCandidatsContainer.innerHTML = `
+      <p style="text-align: center; color: #64748b; font-style: italic; padding: 15px;">
+        Pas de candidat inscrit pour le moment
+      </p>
+    `;
     return;
   }
 
@@ -61,74 +64,81 @@ function afficherCandidatsFormulaire() {
   });
 }
 
-// Boutons "Je veux voter" et "Retour"
+// Action : "Je veux voter"
 if (btnVoter) {
   btnVoter.addEventListener("click", () => {
     sectionFormulaire.classList.remove("hidden");
+    etape1.classList.remove("hidden");
+    etape2.classList.add("hidden");
+    masquerMessage();
     sectionFormulaire.scrollIntoView({ behavior: "smooth" });
   });
 }
 
-if (btnRetour) {
-  btnRetour.addEventListener("click", () => {
-    sectionFormulaire.classList.add("hidden");
-    voteMessage.classList.add("hidden");
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  });
-}
+// Action : Passage de l'Étape 1 à l'Étape 2
+if (btnVersEtape2) {
+  btnVersEtape2.addEventListener("click", () => {
+    masquerMessage();
 
-// Système de vérification de l'âge (15 à 40 ans)
-function calculerAge(dateNaissance) {
-  const aujourdhui = new Date();
-  const dateNaissanceObj = new Date(dateNaissance);
-  let age = aujourdhui.getFullYear() - dateNaissanceObj.getFullYear();
-  const moisDiff = aujourdhui.getMonth() - dateNaissanceObj.getMonth();
-
-  if (moisDiff < 0 || (moisDiff === 0 && aujourdhui.getDate() < dateNaissanceObj.getDate())) {
-    age--;
-  }
-  return age;
-}
-
-if (voteForm) {
-  voteForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-    
-    // Bloquer le vote s'il n'y a pas de candidat
-    if (candidats.length === 0) {
-       afficherMessage("Impossible de voter : aucun candidat n'est inscrit pour le moment.", "error");
-       return;
-    }
-
-    voteMessage.classList.add("hidden");
-    voteMessage.className = "message-box hidden";
-
+    const nomPrenoms = document.getElementById("nom-prenoms").value.trim();
     const dobInput = document.getElementById("dob").value;
-    if (!dobInput) {
-      afficherMessage("Veuillez entrer votre date de naissance.", "error");
+    const typeDoc = document.getElementById("type-document").value;
+    const fileDoc = document.getElementById("file-document").files.length;
+
+    if (!nomPrenoms || !dobInput || !typeDoc || fileDoc === 0) {
+      afficherMessage("Veuillez remplir tous les champs et ajouter votre document.", "error");
       return;
     }
 
     const age = calculerAge(dobInput);
-
     if (age < 15 || age > 40) {
-      afficherMessage(
-        `❌ Vote non autorisé : Vous avez ${age} ans. Pour voter, vous devez avoir entre 15 et 40 ans.`, 
-        "error"
-      );
+      afficherMessage(`❌ Vote non autorisé : Vous avez ${age} ans. Seules les personnes âgées de 15 à 40 ans peuvent voter.`, "error");
+      return;
+    }
+
+    // Si tout est bon, on affiche l'étape 2
+    etape1.classList.add("hidden");
+    etape2.classList.remove("hidden");
+    chargerCandidats();
+  });
+}
+
+// Action : Retour à l'Étape 1
+if (btnRetourEtape1) {
+  btnRetourEtape1.addEventListener("click", () => {
+    etape2.classList.add("hidden");
+    etape1.classList.remove("hidden");
+    masquerMessage();
+  });
+}
+
+// Action : Retour Accueil
+if (btnRetourAccueil) {
+  btnRetourAccueil.addEventListener("click", () => {
+    sectionFormulaire.classList.add("hidden");
+    masquerMessage();
+  });
+}
+
+// Action : Validation finale du Vote
+if (formEtape2) {
+  formEtape2.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    if (candidats.length === 0) {
+      afficherMessage("Impossible de valider : aucun candidat n'est inscrit pour le moment.", "error");
+      return;
+    }
+
+    const candidatChoisi = document.querySelector('input[name="candidat"]:checked');
+    if (!candidatChoisi) {
+      afficherMessage("Veuillez choisir un candidat.", "error");
       return;
     }
 
     afficherMessage("✅ Votre vote a été enregistré avec succès !", "success");
-    
     setTimeout(() => {
-      voteForm.reset();
-    }, 2000);
+      location.reload();
+    }, 3000);
   });
-}
-
-function afficherMessage(message, type) {
-  voteMessage.textContent = message;
-  voteMessage.className = `message-box ${type}`;
-  voteMessage.classList.remove("hidden");
 }
