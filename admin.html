@@ -3,43 +3,58 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin - Élections Jeunesse d'Adjouan</title>
+  <title>Admin - Élections Jeunesse d'Adjouan 2026</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; margin: 0; padding: 15px; color: #1c1e21; }
-    .container { max-width: 600px; margin: 0 auto; }
+    .container { max-width: 650px; margin: 0 auto; }
     .card { background: #ffffff; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-    h2 { color: #004d40; margin-top: 0; font-size: 1.2rem; display: flex; align-items: center; gap: 8px; }
+    h2 { color: #004d40; margin-top: 0; font-size: 1.2rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px; }
     .form-group { margin-bottom: 15px; }
     label { display: block; font-weight: 600; margin-bottom: 5px; font-size: 0.9rem; color: #4b5563; }
     input[type="text"], textarea, input[type="file"] { width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 8px; box-sizing: border-box; font-size: 0.95rem; }
-    button { background-color: #004d40; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; transition: background 0.2s; }
+    button { background-color: #004d40; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; }
     button:hover { background-color: #00332c; }
-    button:disabled { background-color: #9ca3af; }
+    button:disabled { background-color: #9ca3af; cursor: not-allowed; }
+    
+    .status-bar { padding: 12px; border-radius: 8px; font-weight: bold; text-align: center; margin-bottom: 15px; }
+    .status-open { background-color: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+    .status-closed { background-color: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+
     table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-    th, td { padding: 10px; text-align: left; border-bottom: 1px solid #e5e7eb; font-size: 0.9rem; }
+    th, td { padding: 10px; text-align: left; border-bottom: 1px solid #e5e7eb; font-size: 0.88rem; }
     th { background-color: #f9fafb; color: #374151; }
     .img-preview { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; }
-    .btn-danger { background-color: #dc2626; padding: 6px 10px; font-size: 0.8rem; width: auto; }
-    .btn-danger:hover { background-color: #b91c1c; }
+    .btn-action { padding: 6px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: bold; border: none; cursor: pointer; color: white; margin-right: 4px; }
+    .btn-edit { background-color: #0284c7; }
+    .btn-delete { background-color: #dc2626; }
     .badge { background: #e0f2fe; color: #0369a1; padding: 3px 8px; border-radius: 12px; font-size: 0.8rem; font-weight: 600; }
   </style>
 </head>
 <body>
 
 <div class="container">
-  
-  <!-- RÉSULTATS -->
+
+  <!-- STATUT AUTOMATIQUE DU SCRUTIN -->
   <div class="card">
-    <h2>🗳️ Résultats en direct</h2>
+    <h2>🤖 Contrôle Automatique du Scrutin</h2>
+    <div id="status-container" class="status-bar status-closed">
+      <span id="status-text">Vérification de la date du scrutin...</span>
+    </div>
+  </div>
+  
+  <!-- RÉSULTATS EN DIRECT -->
+  <div class="card">
+    <h2>🗳️ Votes en Direct</h2>
     <div id="resultats-container">Chargement...</div>
     <button onclick="chargerDonnees()" style="margin-top: 12px; background-color: #1e293b;">🔄 Rafraîchir les données</button>
   </div>
 
-  <!-- AJOUTER UN CANDIDAT -->
+  <!-- AJOUT / MODIFICATION CANDIDAT -->
   <div class="card">
-    <h2>👥 Ajouter un Candidat</h2>
-    <form id="form-candidat" onsubmit="ajouterCandidat(event)">
+    <h2 id="form-title">👥 Ajouter un Candidat</h2>
+    <form id="form-candidat" onsubmit="enregistrerCandidat(event)">
+      <input type="hidden" id="candidat_id">
       <div class="form-group">
         <label>Nom et Prénom :</label>
         <input type="text" id="nom_candidat" required placeholder="Ex: Kouamé N'diamoi Theodore">
@@ -53,31 +68,32 @@
         <textarea id="ambition_candidat" rows="3" required placeholder="Votre message aux jeunes..."></textarea>
       </div>
       <div class="form-group">
-        <label>Photo de profil :</label>
-        <input type="file" id="photo_candidat" accept="image/*" required>
+        <label>Photo de profil <small id="photo-label-note">(requise)</small> :</label>
+        <input type="file" id="photo_candidat" accept="image/*">
       </div>
-      <button type="submit" id="btn-ajouter">➕ Enregistrer le candidat</button>
+      <button type="submit" id="btn-enregistrer">➕ Enregistrer le candidat</button>
+      <button type="button" id="btn-annuler" style="background-color: #6b7280; margin-top: 8px; display: none;" onclick="reinitialiserFormulaire()">Annuler la modification</button>
     </form>
   </div>
 
   <!-- LISTE DES CANDIDATS -->
   <div class="card">
-    <h2>Liste des candidats</h2>
+    <h2>📋 Liste des Candidats</h2>
     <table>
       <thead>
         <tr>
           <th>Photo</th>
           <th>Candidat</th>
-          <th>Action</th>
+          <th>Actions</th>
         </tr>
       </thead>
       <tbody id="liste-candidats"></tbody>
     </table>
   </div>
 
-  <!-- LISTE DES ÉLECTEURS -->
+  <!-- LISTE DES ÉLECTEURS ET NOMBRE TOTAL -->
   <div class="card">
-    <h2>📋 Électeurs Inscrits (<span id="total-electeurs">0</span>)</h2>
+    <h2>👥 Électeurs Inscrits (<span id="total-electeurs">0</span>)</h2>
     <table>
       <thead>
         <tr>
@@ -93,93 +109,157 @@
 </div>
 
 <script>
-  // CLÉS SUPABASE
-  const SUPABASE_URL = 'https://qktfqpsqmcrgtmauntfj.supabase.co';
+  const SUPABASE_URL = 'https://qktfqpsqmcrgtmauntfj.supabase.co/rest/v1/';
   const SUPABASE_ANON_KEY = 'sb_publishable_45SBmGTiYtsCv5QEmYIovQ_WiAzSrCl';
 
   const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  let scrutinOuvert = false;
+
+  // HORAIRES AUTOMATIQUES : Le 11 à 08h00 jusqu'à 18h00
+  function estScrutinOuvertSysteme() {
+    const maintenant = new Date();
+    
+    // Définir la date d'ouverture : 11 (du mois en cours) à 08:00:00
+    const ouverture = new Date(maintenant.getFullYear(), maintenant.getMonth(), 11, 8, 0, 0);
+    // Définir la date de fermeture : 11 à 18:00:00
+    const fermeture = new Date(maintenant.getFullYear(), maintenant.getMonth(), 11, 18, 0, 0);
+
+    return maintenant >= ouverture && maintenant <= fermeture;
+  }
 
   async function chargerDonnees() {
+    verifierEtatScrutin();
     await chargerCandidats();
     await chargerElecteurs();
     await chargerResultats();
+  }
+
+  function verifierEtatScrutin() {
+    scrutinOuvert = estScrutinOuvertSysteme();
+
+    const statusContainer = document.getElementById('status-container');
+    const statusText = document.getElementById('status-text');
+    const btnEnregistrer = document.getElementById('btn-enregistrer');
+
+    if (scrutinOuvert) {
+      statusContainer.className = 'status-bar status-open';
+      statusText.textContent = '🟢 SCRUTIN OUVERT PAR LE SYSTÈME (Vote en cours). Les modifications de candidats sont verrouillées.';
+      btnEnregistrer.disabled = true;
+    } else {
+      statusContainer.className = 'status-bar status-closed';
+      statusText.textContent = '🔴 SCRUTIN FERMÉ PAR LE SYSTÈME (Ouverture programmée : le 11 de 08h00 à 18h00). Modifications autorisées.';
+      btnEnregistrer.disabled = false;
+    }
   }
 
   async function chargerCandidats() {
     const tbody = document.getElementById('liste-candidats');
     tbody.innerHTML = '';
     const { data: candidats } = await supabaseClient.from('candidats').select('*');
-    if (candidats) {
-      candidats.forEach(c => {
-        tbody.innerHTML += `
-          <tr>
-            <td><img src="${c.photo_url}" class="img-preview" alt="${c.nom_prenom}"></td>
-            <td><strong>${c.nom_prenom}</strong><br><small style="color:#6b7280">${c.profession}</small></td>
-            <td><button class="btn-danger" onclick="supprimerCandidat('${c.id}')">Supprimer</button></td>
-          </tr>
-        `;
-      });
-    }
-  }
 
-  async function ajouterCandidat(e) {
-    e.preventDefault();
-    const nom = document.getElementById('nom_candidat').value;
-    const profession = document.getElementById('profession_candidat').value;
-    const ambition = document.getElementById('ambition_candidat').value;
-    const fileInput = document.getElementById('photo_candidat');
-    const btn = document.getElementById('btn-ajouter');
-
-    if (!fileInput.files || fileInput.files.length === 0) {
-      alert("Veuillez sélectionner une photo.");
+    if (!candidats || candidats.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="3">Aucun candidat enregistré.</td></tr>';
       return;
     }
 
+    candidats.forEach(c => {
+      const actionsDisabled = scrutinOuvert ? 'disabled style="opacity:0.5; cursor:not-allowed;" title="Verrouillé pendant le scrutin"' : '';
+      tbody.innerHTML += `
+        <tr>
+          <td><img src="${c.photo_url}" class="img-preview" alt="${c.nom_prenom}"></td>
+          <td><strong>${c.nom_prenom}</strong><br><small style="color:#6b7280">${c.profession}</small></td>
+          <td>
+            <button class="btn-action btn-edit" ${actionsDisabled} onclick="preparerModification('${c.id}', '${c.nom_prenom.replace(/'/g, "\\'")}', '${c.profession.replace(/'/g, "\\'")}', '${c.ambition.replace(/'/g, "\\'")}')">Éditer</button>
+            <button class="btn-action btn-delete" ${actionsDisabled} onclick="supprimerCandidat('${c.id}')">Supprimer</button>
+          </td>
+        </tr>
+      `;
+    });
+  }
+
+  async function enregistrerCandidat(e) {
+    e.preventDefault();
+
+    if (scrutinOuvert) {
+      alert("Impossible d'ajouter ou modifier un candidat pendant l'ouverture du scrutin.");
+      return;
+    }
+
+    const id = document.getElementById('candidat_id').value;
+    const nom = document.getElementById('nom_candidat').value.trim();
+    const profession = document.getElementById('profession_candidat').value.trim();
+    const ambition = document.getElementById('ambition_candidat').value.trim();
+    const fileInput = document.getElementById('photo_candidat');
+    const btn = document.getElementById('btn-enregistrer');
+
     btn.disabled = true;
-    btn.textContent = "Téléversement en cours...";
 
     try {
-      const file = fileInput.files[0];
-      const fileExt = file.name.split('.').pop();
-      const fileName = `candidat_${Date.now()}.${fileExt}`;
+      let photoUrl = null;
 
-      const { error: uploadError } = await supabaseClient.storage
-        .from('pieces_identite')
-        .upload(fileName, file);
+      if (fileInput.files && fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        const fileName = `candidat_${Date.now()}.${file.name.split('.').pop()}`;
+        const { error: uploadError } = await supabaseClient.storage.from('pieces_identite').upload(fileName, file);
+        if (uploadError) throw uploadError;
 
-      if (uploadError) throw uploadError;
+        const { data: urlData } = supabaseClient.storage.from('pieces_identite').getPublicUrl(fileName);
+        photoUrl = urlData.publicUrl;
+      }
 
-      const { data: urlData } = supabaseClient.storage
-        .from('pieces_identite')
-        .getPublicUrl(fileName);
+      if (id) {
+        const updates = { nom_prenom: nom, profession: profession, ambition: ambition };
+        if (photoUrl) updates.photo_url = photoUrl;
+        
+        const { error } = await supabaseClient.from('candidats').update(updates).eq('id', id);
+        if (error) throw error;
+        alert("Candidat mis à jour avec succès !");
+      } else {
+        if (!photoUrl) throw new Error("La photo est obligatoire pour un nouveau candidat.");
+        const { error } = await supabaseClient.from('candidats').insert([{ nom_prenom: nom, profession: profession, ambition: ambition, photo_url: photoUrl }]);
+        if (error) throw error;
+        alert("Candidat ajouté avec succès !");
+      }
 
-      const photoUrl = urlData.publicUrl;
-
-      const { error: insertError } = await supabaseClient.from('candidats').insert([{
-        nom_prenom: nom,
-        profession: profession,
-        ambition: ambition,
-        photo_url: photoUrl
-      }]);
-
-      if (insertError) throw insertError;
-
-      document.getElementById('nom_candidat').value = '';
-      document.getElementById('profession_candidat').value = '';
-      document.getElementById('ambition_candidat').value = '';
-      fileInput.value = '';
+      reinitialiserFormulaire();
       chargerDonnees();
 
     } catch (err) {
       alert("Erreur : " + err.message);
     } finally {
       btn.disabled = false;
-      btn.textContent = "➕ Enregistrer le candidat";
     }
   }
 
+  function preparerModification(id, nom, profession, ambition) {
+    if (scrutinOuvert) return;
+    document.getElementById('candidat_id').value = id;
+    document.getElementById('nom_candidat').value = nom;
+    document.getElementById('profession_candidat').value = profession;
+    document.getElementById('ambition_candidat').value = ambition;
+    document.getElementById('form-title').textContent = "✏️ Modifier le Candidat";
+    document.getElementById('btn-enregistrer').textContent = "💾 Sauvegarder les modifications";
+    document.getElementById('btn-annuler').style.display = "block";
+    document.getElementById('photo-label-note').textContent = "(optionnelle lors de la modification)";
+    window.scrollTo({ top: document.getElementById('form-candidat').offsetTop - 20, behavior: 'smooth' });
+  }
+
+  function reinitialiserFormulaire() {
+    document.getElementById('form-candidat').reset();
+    document.getElementById('candidat_id').value = '';
+    document.getElementById('form-title').textContent = "👥 Ajouter un Candidat";
+    document.getElementById('btn-enregistrer').textContent = "➕ Enregistrer le candidat";
+    document.getElementById('btn-annuler').style.display = "none";
+    document.getElementById('photo-label-note').textContent = "(requise)";
+  }
+
   async function supprimerCandidat(id) {
-    if (confirm("Supprimer ce candidat ?")) {
+    if (scrutinOuvert) {
+      alert("Impossible de supprimer un candidat pendant l'ouverture du scrutin.");
+      return;
+    }
+    if (confirm("Supprimer définitivement ce candidat ?")) {
+      await supabaseClient.from('votes').delete().eq('candidat_id', id);
       await supabaseClient.from('candidats').delete().eq('id', id);
       chargerDonnees();
     }
@@ -223,7 +303,7 @@
       });
     }
 
-    let html = '<table><thead><tr><th>Candidat</th><th>Voix</th></tr></thead><tbody>';
+    let html = '<table><thead><tr><th>Candidat</th><th>Voix en direct</th></tr></thead><tbody>';
     Object.values(decompte).forEach(c => {
       html += `<tr><td><strong>${c.nom}</strong></td><td><span class="badge">${c.voix} voix</span></td></tr>`;
     });
@@ -233,6 +313,8 @@
   }
 
   chargerDonnees();
+  // Vérification de l'état toutes les 10 secondes
+  setInterval(verifierEtatScrutin, 10000);
 </script>
 
 </body>
