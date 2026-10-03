@@ -3,268 +3,147 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Élections Jeunesse d'Adjouan 2026</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <style>
-    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; margin: 0; padding: 15px; color: #1c1e21; }
-    .container { max-width: 650px; margin: 0 auto; }
-    
-    /* ANNONCES ET BANIERE D'ORIGINE */
-    .banner { background: linear-gradient(135deg, #004d40, #00796b); color: white; padding: 20px; border-radius: 12px; text-align: center; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
-    .banner h1 { margin: 0 0 10px 0; font-size: 1.6rem; }
-    .banner p { margin: 0; font-size: 0.95rem; opacity: 0.9; }
-
-    .card { background: #ffffff; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-    h2 { color: #004d40; margin-top: 0; font-size: 1.2rem; display: flex; align-items: center; gap: 8px; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px; }
-
-    /* AFFICHAGE DES CANDIDATS */
-    .candidats-list { display: grid; grid-template-columns: 1fr; gap: 20px; margin-top: 15px; }
-    .candidat-card { border: 1px solid #e5e7eb; border-radius: 10px; overflow: hidden; background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-    .candidat-img { width: 100%; height: 260px; object-fit: cover; background-color: #e5e7eb; }
-    .candidat-info { padding: 15px; }
-    .candidat-nom { font-size: 1.2rem; font-weight: bold; color: #004d40; margin: 0 0 5px 0; }
-    .candidat-profession { font-size: 0.85rem; background: #e0f2fe; color: #0369a1; padding: 3px 8px; border-radius: 12px; font-weight: 600; display: inline-block; margin-bottom: 10px; }
-    .candidat-ambition { background: #f9fafb; padding: 10px; border-radius: 8px; border-left: 3px solid #004d40; font-size: 0.9rem; color: #374151; margin-bottom: 12px; line-height: 1.4; }
-    
-    /* FORMULAIRES */
-    .form-group { margin-bottom: 15px; }
-    label { display: block; font-weight: 600; margin-bottom: 5px; font-size: 0.9rem; color: #374151; }
-    input[type="text"], select, input[type="file"] { width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 8px; box-sizing: border-box; font-size: 0.95rem; }
-    
-    button { background-color: #004d40; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; }
-    button:hover { background-color: #00332c; }
-    button:disabled { background-color: #9ca3af; }
-    
-    .btn-danger { background-color: #dc2626; margin-top: 10px; }
-    .btn-danger:hover { background-color: #b91c1c; }
-
-    .notice { background-color: #fef3c7; border-left: 4px solid #f59e0b; color: #92400e; padding: 12px; border-radius: 6px; font-size: 0.85rem; margin-bottom: 15px; }
-  </style>
+  <title>Élection du Président des Jeunes d'Adjouan 2026</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="container">
-  
-  <!-- BANIÈRE / ANNONCE D'ORIGINE -->
-  <div class="banner">
-    <h1>🗳️ Élections Jeunesse d'Adjouan 2026</h1>
-    <p>Plateforme officielle d'enregistrement et de vote pour la jeunesse d'Adjouan.</p>
-  </div>
+  <!-- En-tête -->
+  <header class="header-banner">
+    <h1>Élection du Président des Jeunes d'Adjouan</h1>
+    <p>Village d'Adjouan — 2026</p>
+  </header>
 
-  <!-- ANNONCE IMPORTANTE -->
-  <div class="notice">
-    <strong>📢 Information aux électeurs :</strong> L'inscription nécessite une pièce d'identité valide. Vous pouvez consulter l'ensemble des candidats ci-dessous avant de procéder à votre vote.
-  </div>
+  <main class="container">
 
-  <!-- 1. SECTION CONSULTATION DES CANDIDATS (VOIR TOUS LES CANDIDATS) -->
-  <div class="card">
-    <h2>👥 Liste des Candidats</h2>
-    <div id="candidats-container" class="candidats-list">
-      <p>Chargement des candidats...</p>
-    </div>
-  </div>
-
-  <!-- 2. FORMULAIRE D'INSCRIPTION ET DE VOTE -->
-  <div class="card">
-    <h2>✍️ Formulaire de Vote</h2>
-    <form id="form-vote" onsubmit="soumettreVote(event)">
+    <!-- Section 1 : Accueil / Action principale -->
+    <section class="card">
+      <div class="card-header">
+        <span class="icon">🗳️</span>
+        <h2>Votre voix compte</h2>
+      </div>
+      <p class="subtitle">Participez à l'élection du Président des Jeunes d'Adjouan 2026.</p>
       
-      <div class="form-group">
-        <label>Sélectionnez votre candidat :</label>
-        <select id="candidat_id" required>
-          <option value="">-- Choisissez un candidat --</option>
-        </select>
+      <button class="btn btn-primary" id="btn-voter">
+        🗳️ Je veux voter
+      </button>
+    </section>
+
+    <!-- Section 2 : Affichage dynamique des candidats (Inséré au milieu) -->
+    <section class="card" id="section-candidats">
+      <div class="card-header">
+        <span class="icon">👥</span>
+        <h2>Candidats officiels</h2>
+      </div>
+      
+      <!-- Les candidats ajoutés par l'administrateur s'afficheront ici -->
+      <div id="candidats-container" class="candidats-grid">
+        <!-- Généré dynamiquement par JavaScript -->
+      </div>
+    </section>
+
+    <!-- Section 3 : Conditions pour voter -->
+    <section class="card">
+      <div class="card-header">
+        <span class="icon">📋</span>
+        <h2>Conditions pour voter</h2>
+      </div>
+      <ul class="info-list">
+        <li>Être âgé de <strong>15 à 40 ans</strong>.</li>
+        <li>Être en mesure de présenter une pièce d'identité acceptée.</li>
+        <li>Une seule personne = un seul vote.</li>
+      </ul>
+    </section>
+
+    <!-- Section 4 : Formulaire de Vote (Masqué par défaut) -->
+    <section class="card hidden" id="section-formulaire-vote">
+      <div class="card-header">
+        <span class="icon">📄</span>
+        <h2>Vérification et Vote</h2>
       </div>
 
-      <div class="form-group">
-        <label>Nom et Prénom de l'électeur :</label>
-        <input type="text" id="nom_electeur" required placeholder="Ex: Kouassi Ama Marie">
-      </div>
+      <form id="vote-form">
+        <!-- Sélection de la pièce -->
+        <div class="form-group">
+          <label for="type-document">Type de document :</label>
+          <select id="type-document" required>
+            <option value="">-- Sélectionnez un document --</option>
+            <option value="cni">Carte Nationale d'Identité</option>
+            <option value="extrait">Extrait / Acte de naissance</option>
+            <option value="scolaire">Carte scolaire</option>
+          </select>
+        </div>
 
-      <div class="form-group">
-        <label>Type de pièce d'identité :</label>
-        <select id="type_piece" required>
-          <option value="">-- Type de pièce --</option>
-          <option value="CNI">Carte Nationale d'Identité (CNI)</option>
-          <option value="Attestation">Attestation d'Identité</option>
-          <option value="Carte Scolaire">Carte Scolaire / Étudiant</option>
-          <option value="Passeport">Passeport</option>
-        </select>
-      </div>
+        <!-- Date de naissance pour vérification de l'âge -->
+        <div class="form-group">
+          <label for="dob">Votre date de naissance :</label>
+          <input type="date" id="dob" required>
+        </div>
 
-      <div class="form-group">
-        <label>Photo de votre pièce d'identité :</label>
-        <input type="file" id="piece_identite_file" accept="image/*" required>
-      </div>
+        <!-- Pièce justificative -->
+        <div class="form-group">
+          <label for="file-document">Photo ou fichier du document :</label>
+          <input type="file" id="file-document" accept="image/*,.pdf" required>
+        </div>
 
-      <button type="submit" id="btn-voter">🗳️ Valider mon Vote</button>
-    </form>
-  </div>
-
-  <!-- 3. SECTION DÉSINSCRIPTION -->
-  <div class="card">
-    <h2>🚫 Annuler mon Inscription / Désinscription</h2>
-    <p style="font-size:0.85rem; color:#6b7280; margin-bottom:12px;">
-      Si vous souhaitez retirer votre vote et supprimer vos données enregistrées, saisissez votre Nom & Prénom exacts ci-dessous.
-    </p>
-    <div class="form-group">
-      <label>Nom et Prénom utilisés lors du vote :</label>
-      <input type="text" id="nom_desinscription" placeholder="Ex: Kouassi Ama Marie">
-    </div>
-    <button type="button" class="btn-danger" onclick="seDesinscrire()">❌ Annuler mon inscription</button>
-  </div>
-
-</div>
-
-<script>
-  // CLÉS SUPABASE
-  const SUPABASE_URL = 'https://qktfqpsmqcrgtmauxvyk.supabase.co';
-  const SUPABASE_ANON_KEY = 'sb_publishable_45SBmGTiYtsCv5QEmYIovQ_WiAzSrCl';
-
-  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-  // CHARGER LES CANDIDATS DANS LA LISTE ET LE MENU DÉROULANT
-  async function chargerCandidats() {
-    const container = document.getElementById('candidats-container');
-    const select = document.getElementById('candidat_id');
-    
-    container.innerHTML = '';
-    select.innerHTML = '<option value="">-- Choisissez un candidat --</option>';
-
-    const { data: candidats } = await supabaseClient.from('candidats').select('*');
-
-    if (!candidats || candidats.length === 0) {
-      container.innerHTML = '<p style="color:#6b7280;">Aucun candidat disponible pour le moment.</p>';
-      return;
-    }
-
-    candidats.forEach(c => {
-      // 1. Carte visuelle complète
-      container.innerHTML += `
-        <div class="candidat-card">
-          <img src="${c.photo_url}" alt="${c.nom_prenom}" class="candidat-img" onerror="this.src='https://via.placeholder.com/300x250?text=Photo+Candidat'">
-          <div class="candidat-info">
-            <h3 class="candidat-nom">${c.nom_prenom}</h3>
-            <span class="candidat-profession">${c.profession}</span>
-            <div class="candidat-ambition">
-              <strong>Message aux jeunes :</strong><br>
-              "${c.ambition}"
-            </div>
+        <!-- Choix du candidat -->
+        <div class="form-group">
+          <label>Choisissez votre candidat :</label>
+          <div id="radio-candidats-container" class="radio-list">
+            <!-- Choix générés dynamiquement -->
           </div>
         </div>
-      `;
 
-      // 2. Option dans le formulaire
-      select.innerHTML += `<option value="${c.id}">${c.nom_prenom}</option>`;
-    });
-  }
+        <!-- Avertissement -->
+        <div class="alert alert-warning">
+          ⚠️ <strong>Attention :</strong> après validation, votre vote ne pourra pas être modifié. Un électeur ne peut voter qu'une seule fois.
+        </div>
 
-  // SOUMISSION DU VOTE
-  async function soumettreVote(e) {
-    e.preventDefault();
+        <button type="submit" class="btn btn-primary">
+          🗳️ Confirmer mon choix
+        </button>
+        <button type="button" class="btn btn-secondary" id="btn-retour">
+          ← Retour à l'accueil
+        </button>
+      </form>
 
-    const candidatId = document.getElementById('candidat_id').value;
-    const nomElecteur = document.getElementById('nom_electeur').value.trim();
-    const typePiece = document.getElementById('type_piece').value;
-    const fileInput = document.getElementById('piece_identite_file');
-    const btn = document.getElementById('btn-voter');
+      <!-- Zone de message d'erreur / succès -->
+      <div id="vote-message" class="message-box hidden"></div>
+    </section>
 
-    if (!fileInput.files || fileInput.files.length === 0) {
-      alert("Veuillez téléverser la photo de votre pièce d'identité.");
-      return;
-    }
+    <!-- Section 5 : Pièces acceptées -->
+    <section class="card">
+      <div class="card-header">
+        <span class="icon">💳</span>
+        <h2>Pièces acceptées</h2>
+      </div>
+      <ul class="info-list">
+        <li>💳 Carte Nationale d'Identité</li>
+        <li>📄 Extrait / Acte de naissance</li>
+        <li>🎓 Carte scolaire</li>
+      </ul>
+    </section>
 
-    btn.disabled = true;
-    btn.textContent = "Enregistrement en cours...";
+    <!-- Section 6 : Vote depuis l'étranger -->
+    <section class="card">
+      <div class="card-header">
+        <span class="icon">🌍</span>
+        <h2>Vote depuis l'étranger</h2>
+      </div>
+      <p>Les jeunes d'Adjouan qui se trouvent à l'étranger pourront également participer au vote selon les conditions prévues par l'organisation de l'élection.</p>
+    </section>
 
-    try {
-      // Téléversement de la pièce d'identité
-      const file = fileInput.files[0];
-      const fileExt = file.name.split('.').pop();
-      const fileName = `piece_${Date.now()}.${fileExt}`;
+    <!-- Section 7 : Alerte de sécurité -->
+    <div class="alert alert-important">
+      ⚠️ <strong>Important :</strong> chaque électeur ne peut voter qu'une seule fois.
+    </div>
 
-      const { error: uploadError } = await supabaseClient.storage
-        .from('pieces_identite')
-        .upload(fileName, file);
+  </main>
 
-      if (uploadError) throw uploadError;
+  <footer class="footer">
+    Élection du Président des Jeunes d'Adjouan — 2026
+  </footer>
 
-      const { data: urlData } = supabaseClient.storage
-        .from('pieces_identite')
-        .getPublicUrl(fileName);
-
-      const pieceUrl = urlData.publicUrl;
-
-      // Insertion de l'électeur
-      const { data: electeurData, error: electeurError } = await supabaseClient
-        .from('electeurs')
-        .insert([{ nom_prenom: nomElecteur, type_piece: typePiece, numero_piece: pieceUrl }])
-        .select();
-
-      if (electeurError) throw electeurError;
-
-      // Insertion du vote
-      const { error: voteError } = await supabaseClient
-        .from('votes')
-        .insert([{ candidat_id: candidatId, electeur_id: electeurData[0].id }]);
-
-      if (voteError) throw voteError;
-
-      alert("✅ Vote enregistré avec succès ! Merci de votre participation.");
-      document.getElementById('form-vote').reset();
-
-    } catch (err) {
-      alert("Erreur lors du vote : " + err.message);
-    } finally {
-      btn.disabled = false;
-      btn.textContent = "🗳️ Valider mon Vote";
-    }
-  }
-
-  // FONCTION DE DÉSINSCRIPTION
-  async function seDesinscrire() {
-    const nom = document.getElementById('nom_desinscription').value.trim();
-
-    if (!nom) {
-      alert("Veuillez saisir votre Nom et Prénom pour procéder à la désinscription.");
-      return;
-    }
-
-    if (!confirm(`Voulez-vous vraiment annuler l'inscription et le vote pour "${nom}" ?`)) {
-      return;
-    }
-
-    try {
-      // Trouver l'électeur
-      const { data: electeurs } = await supabaseClient
-        .from('electeurs')
-        .select('id')
-        .eq('nom_prenom', nom);
-
-      if (!electeurs || electeurs.length === 0) {
-        alert("Aucun électeur trouvé sous ce nom.");
-        return;
-      }
-
-      const electeurId = electeurs[0].id;
-
-      // Supprimer son vote
-      await supabaseClient.from('votes').delete().eq('electeur_id', electeurId);
-
-      // Supprimer l'électeur
-      await supabaseClient.from('electeurs').delete().eq('id', electeurId);
-
-      alert("✅ Inscription et vote annulés avec succès.");
-      document.getElementById('nom_desinscription').value = '';
-
-    } catch (err) {
-      alert("Erreur lors de la désinscription : " + err.message);
-    }
-  }
-
-  // Lancement initial
-  chargerCandidats();
-</script>
-
+  <script src="script.js"></script>
 </body>
 </html>
