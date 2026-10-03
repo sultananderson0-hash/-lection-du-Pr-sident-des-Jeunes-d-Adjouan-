@@ -25,7 +25,7 @@ function afficherPage(idPage) {
 // GESTION DU SCRUTIN (DATES DE TEST)
 // ==========================================
 // ⚠️ DATES DE TEST - Le vote est ouvert
-const DATE_OUVERTURE = new Date("2026-01-01T21:00:00"); 
+const DATE_OUVERTURE = new Date("2026-01-01T08:00:00"); 
 const DATE_FERMETURE = new Date("2026-12-31T18:00:00");
 
 function verifierStatutScrutin() {
