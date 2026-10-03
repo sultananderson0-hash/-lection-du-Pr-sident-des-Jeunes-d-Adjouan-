@@ -1,146 +1,63 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Élection du Président des Jeunes d'Adjouan 2026</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Élection Adjouan</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <!-- En-tête -->
-  <header class="header-banner">
-    <h1>Élection du Président des Jeunes d'Adjouan</h1>
-    <p>Village d'Adjouan — 2026</p>
-  </header>
+    <header class="header">
+        <a class="admin-link" href="index.html" title="Retour au site public">🏠</a>
+        <h1>Espace Administrateur</h1>
+        <p>Gestion de l'élection 2026</p>
+    </header>
 
-  <main class="container">
-
-    <!-- Section 1 : Accueil / Action principale -->
-    <section class="card">
-      <div class="card-header">
-        <span class="icon">🗳️</span>
-        <h2>Votre voix compte</h2>
-      </div>
-      <p class="subtitle">Participez à l'élection du Président des Jeunes d'Adjouan 2026.</p>
-      
-      <button class="btn btn-primary" id="btn-voter">
-        🗳️ Je veux voter
-      </button>
-    </section>
-
-    <!-- Section 2 : Affichage dynamique des candidats (Placé au milieu) -->
-    <section class="card" id="section-candidats">
-      <div class="card-header">
-        <span class="icon">👥</span>
-        <h2>Candidats officiels</h2>
-      </div>
-      
-      <!-- Les candidats s'affichent ici dynamiquement -->
-      <div id="candidats-container" class="candidats-grid"></div>
-    </section>
-
-    <!-- Section 3 : Conditions pour voter -->
-    <section class="card">
-      <div class="card-header">
-        <span class="icon">📋</span>
-        <h2>Conditions pour voter</h2>
-      </div>
-      <ul class="info-list">
-        <li>Être âgé de <strong>15 à 40 ans</strong>.</li>
-        <li>Être en mesure de présenter une pièce d'identité acceptée.</li>
-        <li>Une seule personne = un seul vote.</li>
-      </ul>
-    </section>
-
-    <!-- Section 4 : Formulaire de Vote (Masqué par défaut) -->
-    <section class="card hidden" id="section-formulaire-vote">
-      <div class="card-header">
-        <span class="icon">📄</span>
-        <h2>Vérification et Vote</h2>
-      </div>
-
-      <form id="vote-form">
-        <!-- Sélection de la pièce -->
-        <div class="form-group">
-          <label for="type-document">Type de document :</label>
-          <select id="type-document" required>
-            <option value="">-- Sélectionnez un document --</option>
-            <option value="cni">Carte Nationale d'Identité</option>
-            <option value="extrait">Extrait / Acte de naissance</option>
-            <option value="scolaire">Carte scolaire</option>
-          </select>
+    <main class="container">
+        <!-- DASHBOARD -->
+        <div id="page-admin-dashboard" class="page active">
+            <div class="card">
+                <h2>📊 Tableau de bord</h2>
+                <div id="admin-alert" class="alert"></div>
+                <div class="stats-grid">
+                    <div class="stat-box"><h3>Candidats</h3><p id="stat-nb-candidats">0</p></div>
+                    <div class="stat-box"><h3>Votes</h3><p id="stat-nb-votes">0</p></div>
+                </div>
+                <h3 style="font-size: 16px; margin-bottom: 10px;">Liste des candidats</h3>
+                <div id="admin-liste-candidats" style="font-size: 14px; color: #555;"></div>
+                <button class="btn btn-primary" onclick="afficherPage('page-admin-ajout')" style="margin-top: 20px;">➕ Ajouter un candidat</button>
+                <button class="btn btn-secondary" onclick="voirElecteurs()" style="margin-top: 10px;">👥 Voir les électeurs</button>
+            </div>
         </div>
 
-        <!-- Date de naissance pour vérification de l'âge -->
-        <div class="form-group">
-          <label for="dob">Votre date de naissance :</label>
-          <input type="date" id="dob" required>
+        <!-- AJOUT CANDIDAT -->
+        <div id="page-admin-ajout" class="page">
+            <div class="card">
+                <h2>➕ Ajouter un candidat</h2>
+                <form id="form-candidat" onsubmit="ajouterCandidat(event)">
+                    <div class="form-group"><label>Nom *</label><input type="text" id="cand-nom" required></div>
+                    <div class="form-group"><label>Profession *</label><input type="text" id="cand-profession" required></div>
+                    <div class="form-group"><label>Programme *</label><textarea id="cand-programme" required></textarea></div>
+                    <div class="form-group"><label>Ambition *</label><textarea id="cand-ambition" required></textarea></div>
+                    <div class="form-group"><label>Photo (URL) *</label><input type="url" id="cand-photo" required placeholder="https://..."></div>
+                    <button type="submit" class="btn btn-primary" id="btn-ajouter">Ajouter</button>
+                </form>
+                <button class="btn-retour" onclick="afficherPage('page-admin-dashboard')">← Retour</button>
+            </div>
         </div>
 
-        <!-- Pièce justificative -->
-        <div class="form-group">
-          <label for="file-document">Photo ou fichier du document :</label>
-          <input type="file" id="file-document" accept="image/*,.pdf" required>
+        <!-- LISTE ÉLECTEURS -->
+        <div id="page-admin-electeurs" class="page">
+            <div class="card">
+                <h2>👥 Liste des électeurs</h2>
+                <div id="admin-liste-electeurs" style="font-size: 14px;"></div>
+                <button class="btn-retour" onclick="afficherPage('page-admin-dashboard')">← Retour</button>
+            </div>
         </div>
+    </main>
 
-        <!-- Choix du candidat -->
-        <div class="form-group">
-          <label>Choisissez votre candidat :</label>
-          <div id="radio-candidats-container" class="radio-list"></div>
-        </div>
-
-        <!-- Avertissement -->
-        <div class="alert alert-warning">
-          ⚠️ <strong>Attention :</strong> après validation, votre vote ne pourra pas être modifié. Un électeur ne peut voter qu'une seule fois.
-        </div>
-
-        <button type="submit" class="btn btn-primary">
-          🗳️ Confirmer mon choix
-        </button>
-        <button type="button" class="btn btn-secondary" id="btn-retour">
-          ← Retour à l'accueil
-        </button>
-      </form>
-
-      <!-- Message d'erreur ou de succès -->
-      <div id="vote-message" class="message-box hidden"></div>
-    </section>
-
-    <!-- Section 5 : Pièces acceptées -->
-    <section class="card">
-      <div class="card-header">
-        <span class="icon">💳</span>
-        <h2>Pièces acceptées</h2>
-      </div>
-      <ul class="info-list">
-        <li>💳 Carte Nationale d'Identité</li>
-        <li>📄 Extrait / Acte de naissance</li>
-        <li>🎓 Carte scolaire</li>
-      </ul>
-    </section>
-
-    <!-- Section 6 : Vote depuis l'étranger -->
-    <section class="card">
-      <div class="card-header">
-        <span class="icon">🌍</span>
-        <h2>Vote depuis l'étranger</h2>
-      </div>
-      <p>Les jeunes d'Adjouan qui se trouvent à l'étranger pourront également participer au vote selon les conditions prévues par l'organisation de l'élection.</p>
-    </section>
-
-    <!-- Section 7 : Alerte de sécurité -->
-    <div class="alert alert-important">
-      ⚠️ <strong>Important :</strong> chaque électeur ne peut voter qu'une seule fois.
-    </div>
-
-  </main>
-
-  <footer class="footer">
-    Élection du Président des Jeunes d'Adjouan — 2026
-  </footer>
-
-  <!-- Connexion vers le fichier JS (scripts.js) -->
-  <script src="scripts.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="script.js"></script>
 </body>
 </html>
