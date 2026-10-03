@@ -1,8 +1,12 @@
 // ==========================================
 // CONFIGURATION SUPABASE
 // ==========================================
-const SUPABASE_URL = 'https://qktfqpsqmcrgtmauntfj.supabase.co'; // Remplacez ceci
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrdGZxcHNxbWNyZ3RtYXVudGZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA5NzU1MDEsImV4cCI6MjEwNjU1MTUwMX0.sugP-f143yDuyUzY8FHZqTS-YuuM3JcGX4tLz2N_kuI'; // Remplacez ceci
+const SUPABASE_URL = 'https://qktfqpsqmcrgtmauntfj.supabase.co'; 
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrdGZxcHNxbWNyZ3RtYXVudGZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA5NzU1MDEsImV4cCI6MjEwNjU1MTUwMX0.sugP-f143yDuyUzY8FHZqTS-YuuM3JcGX4tLz2N_kuI'; 
+// ⚠️ IMPORTANT : Remplacez la ligne ci-dessus par VOTRE clé anon complète.
+// Je ne peux pas voir la fin de votre clé sur la capture, donc j'ai mis une clé fictive.
+// Copiez votre vraie clé "anon public" depuis Supabase (Settings > API).
+
 const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // Variables globales
@@ -24,9 +28,13 @@ function afficherPage(idPage) {
 // ==========================================
 // GESTION DU SCRUTIN (TEMPS)
 // ==========================================
-// Les dates sont figées ici comme demandé
-const DATE_OUVERTURE = new Date("2026-10-11T08:00:00"); 
-const DATE_FERMETURE = new Date("2026-10-11T18:00:00");
+// ⚠️ DATES DE TEST (Le vote est ouvert pour vos tests)
+// Pour la mise en ligne finale, remplacez par :
+// const DATE_OUVERTURE = new Date("2026-10-11T08:00:00");
+// const DATE_FERMETURE = new Date("2026-10-11T18:00:00");
+
+const DATE_OUVERTURE = new Date("2026-01-01T08:00:00"); 
+const DATE_FERMETURE = new Date("2026-12-31T18:00:00");
 
 function verifierStatutScrutin() {
     const maintenant = new Date();
@@ -45,8 +53,8 @@ function verifierStatutScrutin() {
         btnVoter.style.opacity = "0.5";
     } else if (maintenant >= DATE_OUVERTURE && maintenant < DATE_FERMETURE) {
         badge.className = "status-badge status-open";
-        badge.innerText = "✅ Scrutin ouvert";
-        msg.innerText = "Le vote est en cours. Clôture à 18h00.";
+        badge.innerText = "✅ Scrutin ouvert (TEST)";
+        msg.innerText = "Le vote est en cours (phase de test).";
         btnVoter.disabled = false;
         btnVoter.innerText = "🗳️ Je veux voter";
         btnVoter.style.opacity = "1";
