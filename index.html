@@ -1,150 +1,420 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Élection du Président des Jeunes d'Adjouan 2026</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Élection du Président des Jeunes d'Adjouan</title>
+    <style>
+        /* --- STYLES GÉNÉRAUX --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f4f6f9;
+            color: #333;
+            padding-bottom: 30px;
+        }
+
+        /* --- EN-TÊTE --- */
+        .header {
+            background-color: #116b39;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        /* --- CONTENEUR PRINCIPAL --- */
+        .container {
+            max-width: 500px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+
+        /* --- CARTES --- */
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .card h2 {
+            font-size: 18px;
+            color: #116b39;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card p {
+            font-size: 15px;
+            line-height: 1.5;
+            color: #555;
+            margin-bottom: 15px;
+        }
+
+        /* --- BOUTONS --- */
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+            transition: background 0.3s;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background-color: #116b39;
+            color: white;
+            margin-bottom: 10px;
+        }
+
+        .btn-primary:hover {
+            background-color: #0d522b;
+        }
+
+        /* --- LISTES --- */
+        ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        ul li {
+            font-size: 15px;
+            color: #444;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        ul li::before {
+            content: "•";
+            color: #116b39;
+            font-weight: bold;
+            font-size: 18px;
+            line-height: 1;
+        }
+
+        /* --- ALERTES --- */
+        .alert {
+            background-color: #fff9e6;
+            border-left: 4px solid #f1c40f;
+            padding: 15px;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #7a5c00;
+            margin-bottom: 15px;
+        }
+
+        /* --- FORMULAIRES --- */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 15px;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #116b39;
+        }
+
+        /* --- CANDIDATS --- */
+        .candidat-option {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .candidat-option:hover {
+            border-color: #116b39;
+            background-color: #f0fdf4;
+        }
+
+        .candidat-option input[type="radio"] {
+            margin-right: 15px;
+            width: 20px;
+            height: 20px;
+            accent-color: #116b39;
+        }
+
+        .candidat-option label {
+            font-weight: 500;
+            cursor: pointer;
+            flex-grow: 1;
+        }
+
+        /* --- PAGE CACHÉE --- */
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* --- BOUTON RETOUR --- */
+        .btn-retour {
+            background: none;
+            border: none;
+            color: #116b39;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+            width: 100%;
+            text-align: center;
+            font-size: 15px;
+        }
+
+        .btn-retour:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
 
-  <!-- En-tête -->
-  <header class="header-banner">
-    <h1>Élection du Président des Jeunes d'Adjouan</h1>
-    <p>Village d'Adjouan — 2026</p>
-  </header>
+    <!-- EN-TÊTE -->
+    <header class="header">
+        <h1>Jeunes d'Adjouan</h1>
+        <p>Village d'Adjouan — 2026</p>
+    </header>
 
-  <main class="container">
+    <main class="container">
 
-    <!-- Section 1 : Accueil -->
-    <section class="card" id="section-accueil">
-      <div class="card-header">
-        <span class="icon">🗳️</span>
-        <h2>Votre voix compte</h2>
-      </div>
-      <p class="subtitle">Participez à l'élection du Président des Jeunes d'Adjouan 2026.</p>
-      
-      <button class="btn btn-primary" id="btn-voter">
-        🗳️ Je veux voter
-      </button>
-    </section>
+        <!-- ================= PAGE 1 : ACCUEIL ================= -->
+        <div id="page-accueil" class="page active">
+            <div class="card">
+                <h2>🗳️ Votre voix compte</h2>
+                <p>Participez à l'élection du Président des Jeunes d'Adjouan 2026.</p>
+                
+                <!-- Bouton pour aller s'enregistrer -->
+                <button class="btn btn-primary" onclick="afficherPage('page-inscription')">
+                    🗳️ Je veux voter
+                </button>
+            </div>
 
-    <!-- Section 2 : Espace de Vote en 2 étapes -->
-    <section class="card hidden" id="section-formulaire-vote">
-      
-      <!-- ÉTAPE 1 : Renseigner les informations -->
-      <div id="etape-1-infos">
-        <div class="card-header">
-          <span class="icon">📝</span>
-          <h2>Étape 1 : Vos Informations</h2>
+            <div class="card">
+                <h2>📋 Conditions pour voter</h2>
+                <ul>
+                    <li>Être âgé de 15 à 40 ans.</li>
+                    <li>Être en mesure de présenter une pièce d'identité acceptée.</li>
+                    <li>Une seule personne = un seul vote.</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h2>🪪 Pièces acceptées</h2>
+                <ul>
+                    <li>Carte Nationale d'Identité</li>
+                    <li>Extrait / Acte de naissance</li>
+                    <li>Carte scolaire</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h2>🌍 Vote depuis l'étranger</h2>
+                <p>Les jeunes d'Adjouan qui se trouvent à l'étranger pourront également participer au vote selon les conditions prévues par l'organisation de l'élection.</p>
+            </div>
+
+            <div class="alert">
+                ⚠️ <strong>Important :</strong> chaque électeur ne peut voter qu'une seule fois.
+            </div>
         </div>
 
-        <form id="form-etape-1">
-          <div class="form-group">
-            <label for="nom-prenoms">Nom et Prénom(s) :</label>
-            <input type="text" id="nom-prenoms" placeholder="Ex: Kouadio Jean" required>
-          </div>
-
-          <div class="form-group">
-            <label for="dob">Date de naissance :</label>
-            <input type="date" id="dob" required>
-          </div>
-
-          <div class="form-group">
-            <label for="type-document">Type de document d'identité :</label>
-            <select id="type-document" required>
-              <option value="">-- Sélectionnez un document --</option>
-              <option value="cni">Carte Nationale d'Identité</option>
-              <option value="extrait">Extrait / Acte de naissance</option>
-              <option value="scolaire">Carte scolaire</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label for="file-document">Photo ou scan de la pièce :</label>
-            <input type="file" id="file-document" accept="image/*,.pdf" required>
-          </div>
-
-          <button type="button" class="btn btn-primary" id="btn-vers-etape-2">
-            Continuer vers les candidats ➔
-          </button>
-          <button type="button" class="btn btn-secondary" id="btn-retour-accueil">
-            ← Retour
-          </button>
-        </form>
-      </div>
-
-      <!-- ÉTAPE 2 : Choix du candidat et validation -->
-      <div id="etape-2-candidats" class="hidden">
-        <div class="card-header">
-          <span class="icon">🗳️</span>
-          <h2>Étape 2 : Choisissez votre candidat</h2>
+        <!-- ================= PAGE 2 : INSCRIPTION ================= -->
+        <div id="page-inscription" class="page">
+            <div class="card">
+                <h2>📝 Enregistrement de l'électeur</h2>
+                <p>Veuillez remplir ce formulaire pour accéder au vote.</p>
+                
+                <form id="form-inscription" onsubmit="validerInscription(event)">
+                    <div class="form-group">
+                        <label for="nom">Nom et Prénoms *</label>
+                        <input type="text" id="nom" required placeholder="Ex: KOUASSI Jean">
+                    </div>
+                    <div class="form-group">
+                        <label for="age">Âge *</label>
+                        <input type="number" id="age" required min="15" max="40" placeholder="Ex: 25">
+                    </div>
+                    <div class="form-group">
+                        <label for="piece">Type de pièce d'identité *</label>
+                        <select id="piece" required>
+                            <option value="">-- Sélectionnez un document --</option>
+                            <option value="CNI">Carte Nationale d'Identité</option>
+                            <option value="Extrait">Extrait / Acte de naissance</option>
+                            <option value="Scolaire">Carte scolaire</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="fichier">Photo ou fichier du document *</label>
+                        <input type="file" id="fichier" required accept="image/*,.pdf">
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">✅ Valider mon inscription</button>
+                </form>
+                
+                <button class="btn-retour" onclick="afficherPage('page-accueil')">← Retour à l'accueil</button>
+            </div>
         </div>
 
-        <form id="form-etape-2">
-          <!-- Zone d'affichage des candidats -->
-          <div class="form-group">
-            <div id="radio-candidats-container" class="radio-list"></div>
-          </div>
+        <!-- ================= PAGE 3 : VOTE ================= -->
+        <div id="page-vote" class="page">
+            <div class="card">
+                <h2>🗳️ Choisissez votre candidat</h2>
+                <p id="message-bienvenue" style="font-weight: bold; color: #116b39; margin-bottom: 15px;"></p>
+                
+                <form id="form-vote" onsubmit="validerVote(event)">
+                    <!-- Les candidats sont générés ici par JS, mais voici la structure -->
+                    <div id="liste-candidats">
+                        <!-- Exemple de candidat -->
+                        <label class="candidat-option">
+                            <input type="radio" name="candidat" value="Candidat 1" required>
+                            <span>👤 Candidat 1</span>
+                        </label>
+                        <label class="candidat-option">
+                            <input type="radio" name="candidat" value="Candidat 2" required>
+                            <span>👤 Candidat 2</span>
+                        </label>
+                        <label class="candidat-option">
+                            <input type="radio" name="candidat" value="Candidat 3" required>
+                            <span>👤 Candidat 3</span>
+                        </label>
+                    </div>
 
-          <div class="alert alert-warning">
-            ⚠️ <strong>Attention :</strong> une fois validé, votre vote est définitif et ne pourra pas être modifié.
-          </div>
+                    <div class="alert" style="margin-top: 15px;">
+                        ⚠️ <strong>Attention :</strong> après validation, votre vote ne pourra pas être modifié. Un électeur ne peut voter qu'une seule fois.
+                    </div>
 
-          <button type="submit" class="btn btn-primary" id="btn-valider-vote">
-            🗳️ Confirmer mon vote
-          </button>
-          <button type="button" class="btn btn-secondary" id="btn-retour-etape-1">
-            ← Modifier mes informations
-          </button>
-        </form>
-      </div>
+                    <button type="submit" class="btn btn-primary">🗳️ Confirmer mon choix</button>
+                </form>
+                
+                <button class="btn-retour" onclick="afficherPage('page-accueil')">← Retour à l'accueil</button>
+            </div>
+        </div>
 
-      <!-- Message d'erreur ou de succès -->
-      <div id="vote-message" class="message-box hidden"></div>
-    </section>
+        <!-- ================= PAGE 4 : CONFIRMATION ================= -->
+        <div id="page-confirmation" class="page">
+            <div class="card" style="text-align: center;">
+                <h2 style="color: #116b39; justify-content: center;">✅ Vote enregistré !</h2>
+                <p style="font-size: 16px;">Merci <span id="nom-confirmation" style="font-weight: bold;"></span>.</p>
+                <p>Votre vote pour <strong id="candidat-confirmation"></strong> a bien été pris en compte.</p>
+                <p style="font-size: 13px; color: #888; margin-top: 20px;">Un électeur ne peut voter qu'une seule fois.</p>
+                <button class="btn btn-primary" onclick="afficherPage('page-accueil')" style="margin-top: 20px;">Retour à l'accueil</button>
+            </div>
+        </div>
 
-    <!-- Section 3 : Conditions pour voter -->
-    <section class="card">
-      <div class="card-header">
-        <span class="icon">📋</span>
-        <h2>Conditions pour voter</h2>
-      </div>
-      <ul class="info-list">
-        <li>Être âgé de <strong>15 à 40 ans</strong>.</li>
-        <li>Être en mesure de présenter une pièce d'identité acceptée.</li>
-        <li>Une seule personne = un seul vote.</li>
-      </ul>
-    </section>
+    </main>
 
-    <!-- Section 4 : Pièces acceptées -->
-    <section class="card">
-      <div class="card-header">
-        <span class="icon">💳</span>
-        <h2>Pièces acceptées</h2>
-      </div>
-      <ul class="info-list">
-        <li>💳 Carte Nationale d'Identité</li>
-        <li>📄 Extrait / Acte de naissance</li>
-        <li>🎓 Carte scolaire</li>
-      </ul>
-    </section>
+    <!-- ================= JAVASCRIPT ================= -->
+    <script>
+        // Fonction pour changer de page
+        function afficherPage(idPage) {
+            // Cacher toutes les pages
+            const pages = document.querySelectorAll('.page');
+            pages.forEach(page => page.classList.remove('active'));
+            
+            // Afficher la page demandée
+            const pageActive = document.getElementById(idPage);
+            if (pageActive) {
+                pageActive.classList.add('active');
+                window.scrollTo(0, 0); // Remonter en haut de page
+            }
+        }
 
-    <!-- Section 5 : Vote depuis l'étranger -->
-    <section class="card">
-      <div class="card-header">
-        <span class="icon">🌍</span>
-        <h2>Vote depuis l'étranger</h2>
-      </div>
-      <p>Les jeunes d'Adjouan qui se trouvent à l'étranger pourront également participer au vote selon les conditions prévues par l'organisation.</p>
-    </section>
+        // Étape 1 : Validation de l'inscription
+        function validerInscription(event) {
+            event.preventDefault(); // Empêcher le rechargement de la page
 
-  </main>
+            // Récupérer les données du formulaire
+            const nom = document.getElementById('nom').value;
+            const age = document.getElementById('age').value;
+            const piece = document.getElementById('piece').value;
+            const fichier = document.getElementById('fichier').value;
 
-  <footer class="footer">
-    Élection du Président des Jeunes d'Adjouan — 2026
-  </footer>
+            // Vérification basique (le HTML required le fait déjà, mais on s'assure)
+            if (!nom || !age || !piece || !fichier) {
+                alert("Veuillez remplir tous les champs obligatoires.");
+                return;
+            }
 
-  <script src="scripts.js"></script>
+            // Vérification de l'âge (15 à 40 ans)
+            if (age < 15 || age > 40) {
+                alert("Désolé, vous devez avoir entre 15 et 40 ans pour voter.");
+                return;
+            }
+
+            // Afficher le message de bienvenue sur la page de vote
+            document.getElementById('message-bienvenue').innerText = `Bienvenue ${nom}, veuillez choisir votre candidat.`;
+
+            // Passer à la page de vote
+            afficherPage('page-vote');
+        }
+
+        // Étape 2 : Validation du vote
+        function validerVote(event) {
+            event.preventDefault();
+
+            // Récupérer le candidat sélectionné
+            const candidatSelectionne = document.querySelector('input[name="candidat"]:checked');
+            
+            if (!candidatSelectionne) {
+                alert("Veuillez sélectionner un candidat avant de confirmer.");
+                return;
+            }
+
+            const nomCandidat = candidatSelectionne.value;
+            const nomElecteur = document.getElementById('nom').value;
+
+            // Afficher la confirmation
+            document.getElementById('nom-confirmation').innerText = nomElecteur;
+            document.getElementById('candidat-confirmation').innerText = nomCandidat;
+
+            // Passer à la page de confirmation
+            afficherPage('page-confirmation');
+        }
+    </script>
+
 </body>
 </html>
