@@ -3,170 +3,436 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Élection du Président des Jeunes</title>
+  <title>Élection du Président des Jeunes d'Adjouan</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; background: #f4f6f7; color: #333; }
-    header { text-align: center; background: #2c3e50; color: white; padding: 15px; border-radius: 8px; }
-    .card { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-    .btn { background: #2ecc71; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; width: 100%; margin-top: 10px; font-weight: bold; }
-    .btn:disabled { background: #ccc; cursor: not-allowed; }
-    input, select { width: 100%; padding: 8px; margin-top: 5px; margin-bottom: 10px; box-sizing: border-box; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px; }
-    .candidate-card { border: 1px solid #ddd; padding: 15px; border-radius: 8px; text-align: center; background: #fafafa; }
-    .status-msg { margin-top: 10px; padding: 10px; border-radius: 4px; font-weight: bold; }
-    .success { background: #d4edda; color: #155724; }
-    .error { background: #f8d7da; color: #721c24; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: #f0f4f8;
+      color: #1c2d3d;
+      padding-bottom: 40px;
+    }
+
+    /* EN-TÊTE VERT */
+    header {
+      background-color: #0b6638;
+      color: white;
+      text-align: center;
+      padding: 25px 15px;
+      margin-bottom: 20px;
+    }
+
+    header h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      line-height: 1.3;
+      margin-bottom: 8px;
+    }
+
+    header p {
+      font-size: 0.95rem;
+      opacity: 0.9;
+    }
+
+    /* CONTENEUR PRINCIPAL */
+    .container {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 0 15px;
+    }
+
+    /* CARTES */
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 22px 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    }
+
+    .card-title {
+      color: #0b6638;
+      font-size: 1.25rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .card-subtitle {
+      text-align: center;
+      color: #4a5568;
+      font-size: 0.98rem;
+      margin-bottom: 20px;
+      line-height: 1.4;
+    }
+
+    /* BOUTONS */
+    .btn-primary {
+      width: 100%;
+      background-color: #0b6638;
+      color: white;
+      border: none;
+      padding: 14px;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .btn-outline {
+      width: 100%;
+      background-color: #edf7f2;
+      color: #0b6638;
+      border: 1.5px solid #0b6638;
+      padding: 14px;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-link {
+      background: none;
+      border: none;
+      color: #0b6638;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin: 20px auto 0;
+      text-decoration: none;
+    }
+
+    /* LISTES */
+    ul.info-list {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    ul.info-list li {
+      position: relative;
+      padding-left: 20px;
+      margin-bottom: 10px;
+      font-size: 0.95rem;
+      line-height: 1.4;
+      color: #2d3748;
+    }
+
+    ul.info-list li::before {
+      content: "•";
+      position: absolute;
+      left: 4px;
+      color: #1a202c;
+      font-size: 1.2rem;
+    }
+
+    /* ALERTES */
+    .alert-box {
+      background-color: #fef9c3;
+      border-left: 4px solid #eab308;
+      border-radius: 8px;
+      padding: 14px 16px;
+      font-size: 0.9rem;
+      color: #1c2d3d;
+      line-height: 1.4;
+    }
+
+    .alert-box-green {
+      background-color: #e6f4ea;
+      border-radius: 10px;
+      padding: 14px 16px;
+      font-size: 0.9rem;
+      color: #1c2d3d;
+      line-height: 1.4;
+      margin-bottom: 16px;
+    }
+
+    /* FORMULAIRE & INPUTS */
+    label {
+      display: block;
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 6px;
+      margin-top: 14px;
+      color: #2d3748;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #cbd5e0;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      background-color: #f8fafc;
+    }
+
+    .candidate-option {
+      border: 1px solid #e2e8f0;
+      background-color: #f8fafc;
+      padding: 12px 16px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+    }
+
+    .candidate-option input[type="radio"] {
+      width: auto;
+    }
+
+    footer {
+      text-align: center;
+      font-size: 0.85rem;
+      color: #718096;
+      margin-top: 30px;
+    }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
-<header>
-  <h1>Élection du Président des Jeunes</h1>
-  <p>Scrutin du 11/10/2026 (06h00 - 18h00)</p>
-</header>
+  <!-- EN-TÊTE -->
+  <header>
+    <h1>Élection du Président des<br>Jeunes d'Adjouan</h1>
+    <p>Village d'Adjouan — 2026</p>
+  </header>
 
-<!-- ÉTAPE 1 : IDENTIFICATION -->
-<div class="card" id="section-identification">
-  <h2>Identification de l'Électeur</h2>
-  <form id="form-electeur">
-    <label>Nom & Prénom</label>
-    <input type="text" id="nom" required placeholder="Ex: Koffi Jean">
-    
-    <label>Date de Naissance (15 à 40 ans)</label>
-    <input type="date" id="date_naissance" required>
-    
-    <label>Type de pièce d'identité</label>
-    <select id="type_piece">
-      <option value="carte_scolaire">Carte scolaire</option>
-      <option value="carte_identite">Carte Nationale d'Identité</option>
-      <option value="extrait_naissance">Extrait de naissance</option>
-    </select>
-    
-    <label>Photo de la pièce d'identité (Prenez une photo lisible)</label>
-    <input type="file" id="photo_piece" accept="image/*" capture="environment" required>
-    
-    <button type="submit" class="btn" id="btn-soumettre" style="background:#2c3e50;">Vérifier mon identité</button>
-  </form>
-  <div id="msg-electeur" class="status-msg" style="display:none;"></div>
-</div>
+  <div class="container">
 
-<!-- ÉTAPE 2 : BULLETIN DE VOTE -->
-<div class="card" id="section-vote" style="display:none;">
-  <h2>Bulletin de Vote</h2>
-  <div id="candidats-list" class="grid"></div>
-</div>
+    <!-- PAGE D'ACCUEIL -->
+    <div id="page-accueil">
+      <div class="card">
+        <h2 class="card-title" style="justify-content: center;">
+          📬 Votre voix compte
+        </h2>
+        <p class="card-subtitle">
+          Participez à l'élection du Président<br>des Jeunes d'Adjouan 2026.
+        </p>
+        <button class="btn-primary" onclick="naviguerVersFormulaire()">
+          📬 Je veux voter
+        </button>
+        <button class="btn-outline" onclick="naviguerVersFormulaire()">
+          👥 Voir les candidats
+        </button>
+      </div>
 
-<script>
-  // Remplace ces deux lignes par tes identifiants Supabase si besoin
-  const SUPABASE_URL = 'https://qktfqpsqmcrgtmauntfj.supabase.co';
-  const SUPABASE_ANON_KEY = 'sb_publishable_45SBmGTiYtsCv5QEmYIovQ_WiAzSrCl';
-  
-  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  let currentElecteurId = null;
+      <div class="card">
+        <h2 class="card-title">📋 Conditions pour voter</h2>
+        <ul class="info-list">
+          <li>Être âgé de <strong>15 à 40 ans</strong>.</li>
+          <li>Être en mesure de présenter une pièce d'identité acceptée.</li>
+          <li>Une seule personne = un seul vote.</li>
+        </ul>
+      </div>
 
-  async function loadCandidats() {
-    const { data: candidats, error } = await supabaseClient.from('candidats').select('*');
-    const container = document.getElementById('candidats-list');
-    container.innerHTML = '';
-    
-    if (error || !candidats || candidats.length === 0) {
-      container.innerHTML = '<p>Aucun candidat inscrit pour le moment.</p>';
-      return;
+      <div class="card">
+        <h2 class="card-title">🪪 Pièces acceptées</h2>
+        <ul class="info-list">
+          <li>💳 Carte Nationale d'Identité</li>
+          <li>📄 Extrait / Acte de naissance</li>
+          <li>🎓 Carte scolaire</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">🌍 Vote depuis l'étranger</h2>
+        <p style="font-size: 0.95rem; line-height: 1.5; color: #2d3748;">
+          Les jeunes d'Adjouan qui se trouvent à l'étranger pourront également participer au vote selon les conditions prévues par l'organisation de l'élection.
+        </p>
+      </div>
+
+      <div class="card" style="padding: 12px;">
+        <div class="alert-box">
+          ⚠️ <strong>Important :</strong> chaque électeur ne peut voter qu'une seule fois.
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE FORMULAIRE & VOTE -->
+    <div id="page-vote" style="display: none;">
+      
+      <div class="card">
+        <h2 class="card-title">👤 Vos informations</h2>
+        <form id="form-electeur">
+          <label>Nom & Prénom</label>
+          <input type="text" id="nom" required placeholder="Ex: Koffi Jean">
+
+          <label>Date de Naissance</label>
+          <input type="date" id="date_naissance" required>
+
+          <label>Pièce d'identité</label>
+          <select id="type_piece" required>
+            <option value="">-- Sélectionnez un document --</option>
+            <option value="carte_identite">Carte Nationale d'Identité</option>
+            <option value="extrait_naissance">Extrait / Acte de naissance</option>
+            <option value="carte_scolaire">Carte scolaire</option>
+          </select>
+
+          <label>Photo ou fichier du document</label>
+          <input type="file" id="photo_piece" accept="image/*" capture="environment" required>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">🗳️ Choisissez votre candidat</h2>
+        <div id="candidats-container">
+          <!-- Chargé dynamiquement -->
+          <p style="font-size: 0.9rem; color: #718096;">Chargement des candidats...</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="alert-box-green">
+          ⚠️ <strong>Attention :</strong> après validation, votre vote ne pourra pas être modifié. Un électeur ne peut voter qu'une seule fois.
+        </div>
+        <button class="btn-primary" id="btn-valider-vote" onclick="soumettreTout()">
+          📬 Confirmer mon choix
+        </button>
+      </div>
+
+      <button class="btn-link" onclick="naviguerVersAccueil()">
+        ← Retour à l'accueil
+      </button>
+
+    </div>
+
+    <footer>
+      Élection du Président des Jeunes d'Adjouan — 2026
+    </footer>
+
+  </div>
+
+  <script>
+    // Remplace par tes véritables clés Supabase
+    const SUPABASE_URL = 'https://gjoxpvatxxexuzxyhgqm.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_45SBmGTiYtsCv5QEmYIovQ_WiAzSrCl';
+
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    function naviguerVersFormulaire() {
+      document.getElementById('page-accueil').style.display = 'none';
+      document.getElementById('page-vote').style.display = 'block';
+      chargerCandidats();
+      window.scrollTo(0, 0);
     }
-    
-    candidats.forEach(c => {
-      container.innerHTML += `
-        <div class="candidate-card">
-          ${c.photo_url ? `<img src="${c.photo_url}" style="width:100px;height:100px;border-radius:50%;object-fit:cover;">` : ''}
-          <h3>${c.nom_prenom}</h3>
-          <p><strong>Profession :</strong> ${c.profession || '-'}</p>
-          <p><strong>Programme :</strong> ${c.programme || '-'}</p>
-          <button class="btn" onclick="voter('${c.id}')">Voter pour ce candidat</button>
-        </div>`;
-    });
-  }
 
-  document.getElementById('form-electeur').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const msg = document.getElementById('msg-electeur');
-    const btnSubmit = document.getElementById('btn-soumettre');
-    const fileInput = document.getElementById('photo_piece');
-    
-    const dateN = document.getElementById('date_naissance').value;
-    const nom = document.getElementById('nom').value;
-    const typeP = document.getElementById('type_piece').value;
-
-    if (!fileInput.files || fileInput.files.length === 0) {
-      alert('Veuillez ajouter une photo de votre pièce d\'identité.');
-      return;
+    function naviguerVersAccueil() {
+      document.getElementById('page-vote').style.display = 'none';
+      document.getElementById('page-accueil').style.display = 'block';
+      window.scrollTo(0, 0);
     }
 
-    btnSubmit.disabled = true;
-    btnSubmit.textContent = 'Envoi de la photo en cours...';
+    async function chargerCandidats() {
+      const container = document.getElementById('candidats-container');
+      const { data: candidats, error } = await supabaseClient.from('candidats').select('*');
 
-    try {
-      const file = fileInput.files[0];
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+      if (error || !candidats || candidats.length === 0) {
+        container.innerHTML = '<p style="font-size:0.9rem;">Aucun candidat disponible.</p>';
+        return;
+      }
 
-      // 1. Envoi de la photo dans Supabase Storage
-      const { data: uploadData, error: uploadError } = await supabaseClient.storage
-        .from('pieces_identite')
-        .upload(fileName, file);
-
-      if (uploadError) throw uploadError;
-
-      // URL de la photo enregistrée
-      const photoUrl = `${SUPABASE_URL}/storage/v1/object/public/pieces_identite/${fileName}`;
-
-      // 2. Création de l'enregistrement de l'électeur
-      const { data: newE, error: insertError } = await supabaseClient.from('electeurs').insert([{
-        nom_prenom: nom, 
-        date_naissance: dateN, 
-        type_piece: typeP, 
-        numero_piece: photoUrl,
-        est_verifie: true
-      }]).select().single();
-
-      if (insertError) throw insertError;
-
-      currentElecteurId = newE.id;
-      msg.className = 'status-msg success';
-      msg.textContent = 'Identité transmise et confirmée. Veuillez effectuer votre choix ci-dessous.';
-      msg.style.display = 'block';
-
-      document.getElementById('section-vote').style.display = 'block';
-      loadCandidats();
-
-    } catch (err) {
-      msg.className = 'status-msg error';
-      msg.textContent = 'Erreur lors de l\'enregistrement : ' + err.message;
-      msg.style.display = 'block';
-    } finally {
-      btnSubmit.disabled = false;
-      btnSubmit.textContent = 'Vérifier mon identité';
+      container.innerHTML = '';
+      candidats.forEach((c, index) => {
+        container.innerHTML += `
+          <label class="candidate-option">
+            <input type="radio" name="candidat_choisi" value="${c.id}" ${index === 0 ? 'checked' : ''}>
+            <span>📬 <strong>N° ${index + 1}</strong> — ${c.nom_prenom}</span>
+          </label>
+        `;
+      });
     }
-  });
 
-  async function voter(candidatId) {
-    if (!currentElecteurId) return alert('Veuillez d\'abord vous identifier.');
-    
-    const confirmVote = confirm('Êtes-vous sûr de vouloir voter pour ce candidat ? Ce choix est définitif.');
-    if (!confirmVote) return;
+    async function soumettreTout() {
+      const nom = document.getElementById('nom').value;
+      const dateN = document.getElementById('date_naissance').value;
+      const typeP = document.getElementById('type_piece').value;
+      const fileInput = document.getElementById('photo_piece');
+      const radioCandidat = document.querySelector('input[name="candidat_choisi"]:checked');
 
-    const { error } = await supabaseClient.rpc('enregistrer_vote', { 
-      p_electeur_id: currentElecteurId, 
-      p_candidat_id: candidatId 
-    });
+      if (!nom || !dateN || !typeP) {
+        alert('Veuillez remplir toutes vos informations personnelles.');
+        return;
+      }
 
-    if (error) {
-      alert(error.message);
-    } else {
-      alert('Votre vote a été enregistré avec succès ! Merci pour votre participation.');
-      location.reload();
+      if (!fileInput.files || fileInput.files.length === 0) {
+        alert('Veuillez sélectionner la photo de votre pièce d\'identité.');
+        return;
+      }
+
+      if (!radioCandidat) {
+        alert('Veuillez sélectionner un candidat.');
+        return;
+      }
+
+      const btn = document.getElementById('btn-valider-vote');
+      btn.disabled = true;
+      btn.textContent = 'Enregistrement en cours...';
+
+      try {
+        // 1. Upload de la photo
+        const file = fileInput.files[0];
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+
+        const { error: uploadError } = await supabaseClient.storage
+          .from('pieces_identite')
+          .upload(fileName, file);
+
+        if (uploadError) throw uploadError;
+
+        const photoUrl = `${SUPABASE_URL}/storage/v1/object/public/pieces_identite/${fileName}`;
+
+        // 2. Création de l'électeur
+        const { data: electeur, error: electeurError } = await supabaseClient.from('electeurs').insert([{
+          nom_prenom: nom,
+          date_naissance: dateN,
+          type_piece: typeP,
+          numero_piece: photoUrl,
+          est_verifie: true
+        }]).select().single();
+
+        if (electeurError) throw electeurError;
+
+        // 3. Enregistrement du vote
+        const { error: voteError } = await supabaseClient.rpc('enregistrer_vote', {
+          p_electeur_id: electeur.id,
+          p_candidat_id: radioCandidat.value
+        });
+
+        if (voteError) throw voteError;
+
+        alert('Votre vote a été enregistré avec succès ! Merci pour votre participation.');
+        location.reload();
+
+      } catch (err) {
+        alert('Erreur : ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '📬 Confirmer mon choix';
+      }
     }
-  }
-</script>
+  </script>
 </body>
-</html>
+          </html>
+  
