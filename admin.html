@@ -15,12 +15,13 @@
     .card h2 { color: #0b6638; font-size: 1.15rem; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; }
     label { display: block; font-weight: 600; font-size: 0.85rem; margin-top: 10px; margin-bottom: 4px; }
     input { width: 100%; padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px; font-size: 0.9rem; }
-    button { background-color: #0b6638; color: white; border: none; padding: 10px 15px; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 0.9rem; margin-top: 10px; width: 100%; }
+    button { background-color: #0b6638; color: white; border: none; padding: 10px 15px; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 0.9rem; margin-top: 12px; width: 100%; }
     .btn-danger { background-color: #e53e3e; width: auto; padding: 4px 8px; font-size: 0.8rem; margin-top: 0; }
     table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85rem; }
-    th, td { text-align: left; padding: 10px; border-bottom: 1px solid #e2e8f0; }
+    th, td { text-align: left; padding: 10px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
     th { background-color: #f7fafc; color: #4a5568; }
     .badge { background: #e6f4ea; color: #0b6638; padding: 3px 8px; border-radius: 12px; font-weight: 700; font-size: 0.8rem; }
+    .candidate-img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
     a.link-doc { color: #3182ce; text-decoration: none; font-weight: 600; }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -44,17 +45,23 @@
 
     <!-- SECTION 2 : GESTION DES CANDIDATS -->
     <div class="card">
-      <h2>👥 Gestion des Candidats</h2>
+      <h2>👥 Ajouter un Candidat</h2>
       <form id="form-candidat" onsubmit="ajouterCandidat(event)">
         <label>Nom & Prénom du candidat</label>
         <input type="text" id="nom_candidat" placeholder="Ex: Yao Kouassi Denis" required>
-        <button type="submit">➕ Ajouter le candidat</button>
+
+        <label>Photo du candidat</label>
+        <input type="file" id="photo_candidat" accept="image/*" required>
+
+        <button type="submit" id="btn-ajouter">➕ Enregistrer le candidat</button>
       </form>
 
-      <table style="margin-top: 20px;">
+      <h2 style="margin-top: 25px;">Liste des candidats</h2>
+      <table>
         <thead>
           <tr>
-            <th>Candidat</th>
+            <th>Photo</th>
+            <th>Nom</th>
             <th>Action</th>
           </tr>
         </thead>
@@ -103,8 +110,10 @@
       tbody.innerHTML = '';
       if (candidats) {
         candidats.forEach(c => {
+          const imgUrl = c.photo_url || 'https://via.placeholder.com/40';
           tbody.innerHTML += `
             <tr>
+              <td><img src="${imgUrl}" class="candidate-img" alt="${c.nom_prenom}"></td>
               <td><strong>${c.nom_prenom}</strong></td>
               <td><button class="btn-danger" onclick="supprimerCandidat(${c.id})">Supprimer</button></td>
             </tr>
@@ -116,9 +125,48 @@
     async function ajouterCandidat(e) {
       e.preventDefault();
       const nom = document.getElementById('nom_candidat').value;
-      await supabaseClient.from('candidats').insert([{ nom_prenom: nom }]);
-      document.getElementById('nom_candidat').value = '';
-      chargerDonnees();
+      const fileInput = document.getElementById('photo_candidat');
+      const btn = document.getElementById('btn-ajouter');
+
+      if (!fileInput.files || fileInput.files.length === 0) {
+        alert("Veuillez sélectionner une photo pour le candidat.");
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = "Téléversement en cours...";
+
+      try {
+        const file = fileInput.files[0];
+        const fileExt = file.name.split('.').pop();
+        const fileName = `candidat_${Date.now()}.${fileExt}`;
+
+        // Stockage dans le bucket 'pieces_identite'
+        const { error: uploadError } = await supabaseClient.storage
+          .from('pieces_identite')
+          .upload(fileName, file);
+
+        if (uploadError) throw uploadError;
+
+        const photoUrl = `${SUPABASE_URL}/storage/v1/object/public/pieces_identite/${fileName}`;
+
+        // Insertion en BDD
+        const { error: insertError } = await supabaseClient
+          .from('candidats')
+          .insert([{ nom_prenom: nom, photo_url: photoUrl }]);
+
+        if (insertError) throw insertError;
+
+        document.getElementById('nom_candidat').value = '';
+        fileInput.value = '';
+        chargerDonnees();
+
+      } catch (err) {
+        alert("Erreur lors de l'ajout : " + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "➕ Enregistrer le candidat";
+      }
     }
 
     async function supprimerCandidat(id) {
@@ -153,30 +201,31 @@
       const { data: votes } = await supabaseClient.from('votes').select('candidat_id');
       const { data: candidats } = await supabaseClient.from('candidats').select('*');
 
-      if (!votes || !candidats) {
-        container.innerHTML = '<p style="font-size:0.85rem;">Aucun vote enregistré pour l\'instant.</p>';
+      if (!candidats || candidats.length === 0) {
+        container.innerHTML = '<p style="font-size:0.85rem;">Aucun candidat enregistré.</p>';
         return;
       }
 
       const decompte = {};
       candidats.forEach(c => decompte[c.id] = { nom: c.nom_prenom, voix: 0 });
 
-      votes.forEach(v => {
-        if (decompte[v.candidat_id]) {
-          decompte[v.candidat_id].voix += 1;
-        }
-      });
+      if (votes) {
+        votes.forEach(v => {
+          if (decompte[v.candidat_id]) {
+            decompte[v.candidat_id].voix += 1;
+          }
+        });
+      }
 
       let html = '<table><thead><tr><th>Candidat</th><th>Voix</th></tr></thead><tbody>';
       Object.values(decompte).forEach(c => {
         html += `<tr><td><strong>${c.nom}</strong></td><td><span class="badge">${c.voix} vote(s)</span></td></tr>`;
       });
-      html += 'tbody></table>';
+      html += '</tbody></table>';
 
       container.innerHTML = html;
     }
 
-    // Charger les données au lancement
     chargerDonnees();
   </script>
 </body>
