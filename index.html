@@ -10,9 +10,9 @@
     .card { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
     .btn { background: #2ecc71; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; width: 100%; margin-top: 10px; font-weight: bold; }
     .btn:disabled { background: #ccc; cursor: not-allowed; }
-    input, select, textarea { width: 100%; padding: 8px; margin-top: 5px; margin-bottom: 10px; box-sizing: border-box; }
+    input, select { width: 100%; padding: 8px; margin-top: 5px; margin-bottom: 10px; box-sizing: border-box; }
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px; }
-    .candidate-card { border: 1px solid #ddd; padding: 10px; border-radius: 8px; text-align: center; background: #fafafa; }
+    .candidate-card { border: 1px solid #ddd; padding: 15px; border-radius: 8px; text-align: center; background: #fafafa; }
     .status-msg { margin-top: 10px; padding: 10px; border-radius: 4px; font-weight: bold; }
     .success { background: #d4edda; color: #155724; }
     .error { background: #f8d7da; color: #721c24; }
@@ -26,73 +26,63 @@
   <p>Scrutin du 11/10/2026 (06h00 - 18h00)</p>
 </header>
 
-<div class="card">
-  <h2>1. Identification de l'Électeur</h2>
+<!-- ÉTAPE 1 : IDENTIFICATION -->
+<div class="card" id="section-identification">
+  <h2>Identification de l'Électeur</h2>
   <form id="form-electeur">
     <label>Nom & Prénom</label>
-    <input type="text" id="nom" required>
+    <input type="text" id="nom" required placeholder="Ex: Koffi Jean">
     
     <label>Date de Naissance (15 à 40 ans)</label>
     <input type="date" id="date_naissance" required>
     
-    <label>Type de pièce</label>
+    <label>Type de pièce d'identité</label>
     <select id="type_piece">
+      <option value="carte_scolaire">Carte scolaire</option>
       <option value="carte_identite">Carte Nationale d'Identité</option>
       <option value="extrait_naissance">Extrait de naissance</option>
-      <option value="carte_scolaire">Carte scolaire</option>
     </select>
     
-    <label>Numéro de la pièce</label>
-    <input type="text" id="numero_piece" required>
+    <label>Photo de la pièce d'identité (Prenez une photo lisible)</label>
+    <input type="file" id="photo_piece" accept="image/*" capture="environment" required>
     
-    <button type="submit" class="btn" style="background:#2c3e50;">Vérifier mon identité</button>
+    <button type="submit" class="btn" id="btn-soumettre" style="background:#2c3e50;">Vérifier mon identité</button>
   </form>
   <div id="msg-electeur" class="status-msg" style="display:none;"></div>
 </div>
 
-<div class="card">
-  <h2>2. Bulletin de Vote</h2>
+<!-- ÉTAPE 2 : BULLETIN DE VOTE -->
+<div class="card" id="section-vote" style="display:none;">
+  <h2>Bulletin de Vote</h2>
   <div id="candidats-list" class="grid"></div>
 </div>
 
-<div class="card">
-  <h2>Espace Administration (Ajout de Candidat)</h2>
-  <form id="form-candidat">
-    <input type="text" id="c-nom" placeholder="Nom complet du candidat" required>
-    <input type="url" id="c-photo" placeholder="URL de la photo (http://...)">
-    <input type="text" id="c-prof" placeholder="Profession">
-    <textarea id="c-prog" placeholder="Programme"></textarea>
-    <textarea id="c-ambition" placeholder="Ambitions"></textarea>
-    <button type="submit" class="btn" style="background:#2c3e50;">Ajouter le candidat</button>
-  </form>
-  <div id="msg-admin" class="status-msg" style="display:none;"></div>
-</div>
-
 <script>
-  // Remplace ces deux variables par tes vraies clés Supabase
+  // Remplace ces deux lignes par tes identifiants Supabase si besoin
   const SUPABASE_URL = 'https://qktfqpsqmcrgtmauntfj.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable_45SBmGTiYtsCv5QEmYIovQ_WiAzSrCl';
   
-  const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   let currentElecteurId = null;
 
   async function loadCandidats() {
-    const { data: candidats } = await supabase.from('candidats').select('*');
+    const { data: candidats, error } = await supabaseClient.from('candidats').select('*');
     const container = document.getElementById('candidats-list');
     container.innerHTML = '';
     
-    if (!candidats || candidats.length === 0) {
-      container.innerHTML = '<p>Aucun candidat inscrit.</p>';
+    if (error || !candidats || candidats.length === 0) {
+      container.innerHTML = '<p>Aucun candidat inscrit pour le moment.</p>';
       return;
     }
     
     candidats.forEach(c => {
       container.innerHTML += `
         <div class="candidate-card">
+          ${c.photo_url ? `<img src="${c.photo_url}" style="width:100px;height:100px;border-radius:50%;object-fit:cover;">` : ''}
           <h3>${c.nom_prenom}</h3>
-          <p><strong>Prof:</strong> ${c.profession || '-'}</p>
-          <p><strong>Programme:</strong> ${c.programme || '-'}</p>
-          <button class="btn" onclick="voter('${c.id}')" id="btn-vote-${c.id}" disabled>Voter</button>
+          <p><strong>Profession :</strong> ${c.profession || '-'}</p>
+          <p><strong>Programme :</strong> ${c.programme || '-'}</p>
+          <button class="btn" onclick="voter('${c.id}')">Voter pour ce candidat</button>
         </div>`;
     });
   }
@@ -100,59 +90,83 @@
   document.getElementById('form-electeur').addEventListener('submit', async (e) => {
     e.preventDefault();
     const msg = document.getElementById('msg-electeur');
-    const num = document.getElementById('numero_piece').value;
+    const btnSubmit = document.getElementById('btn-soumettre');
+    const fileInput = document.getElementById('photo_piece');
+    
     const dateN = document.getElementById('date_naissance').value;
     const nom = document.getElementById('nom').value;
     const typeP = document.getElementById('type_piece').value;
 
-    let { data: electeur } = await supabase.from('electeurs').select('*').eq('numero_piece', num).single();
-
-    if (!electeur) {
-      const { data: newE, error } = await supabase.from('electeurs').insert([{
-        nom_prenom: nom, date_naissance: dateN, type_piece: typeP, numero_piece: num, est_verifie: true
-      }]).select().single();
-      if (error) { msg.className = 'status-msg error'; msg.textContent = error.message; msg.style.display='block'; return; }
-      electeur = newE;
-    }
-
-    if (electeur.a_vote) {
-      msg.className = 'status-msg error';
-      msg.textContent = 'Vous avez déjà voté !';
-      msg.style.display = 'block';
+    if (!fileInput.files || fileInput.files.length === 0) {
+      alert('Veuillez ajouter une photo de votre pièce d\'identité.');
       return;
     }
 
-    currentElecteurId = electeur.id;
-    msg.className = 'status-msg success';
-    msg.textContent = 'Identité confirmée. Choisissez votre candidat !';
-    msg.style.display = 'block';
-    document.querySelectorAll('[id^="btn-vote-"]').forEach(b => b.disabled = false);
+    btnSubmit.disabled = true;
+    btnSubmit.textContent = 'Envoi de la photo en cours...';
+
+    try {
+      const file = fileInput.files[0];
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+
+      // 1. Envoi de la photo dans Supabase Storage
+      const { data: uploadData, error: uploadError } = await supabaseClient.storage
+        .from('pieces_identite')
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      // URL de la photo enregistrée
+      const photoUrl = `${SUPABASE_URL}/storage/v1/object/public/pieces_identite/${fileName}`;
+
+      // 2. Création de l'enregistrement de l'électeur
+      const { data: newE, error: insertError } = await supabaseClient.from('electeurs').insert([{
+        nom_prenom: nom, 
+        date_naissance: dateN, 
+        type_piece: typeP, 
+        numero_piece: photoUrl,
+        est_verifie: true
+      }]).select().single();
+
+      if (insertError) throw insertError;
+
+      currentElecteurId = newE.id;
+      msg.className = 'status-msg success';
+      msg.textContent = 'Identité transmise et confirmée. Veuillez effectuer votre choix ci-dessous.';
+      msg.style.display = 'block';
+
+      document.getElementById('section-vote').style.display = 'block';
+      loadCandidats();
+
+    } catch (err) {
+      msg.className = 'status-msg error';
+      msg.textContent = 'Erreur lors de l\'enregistrement : ' + err.message;
+      msg.style.display = 'block';
+    } finally {
+      btnSubmit.disabled = false;
+      btnSubmit.textContent = 'Vérifier mon identité';
+    }
   });
 
   async function voter(candidatId) {
-    if (!currentElecteurId) return alert('Identifiez-vous d\'abord.');
-    const { error } = await supabase.rpc('enregistrer_vote', { p_electeur_id: currentElecteurId, p_candidat_id: candidatId });
-    if (error) alert(error.message);
-    else { alert('Vote enregistré avec succès !'); location.reload(); }
+    if (!currentElecteurId) return alert('Veuillez d\'abord vous identifier.');
+    
+    const confirmVote = confirm('Êtes-vous sûr de vouloir voter pour ce candidat ? Ce choix est définitif.');
+    if (!confirmVote) return;
+
+    const { error } = await supabaseClient.rpc('enregistrer_vote', { 
+      p_electeur_id: currentElecteurId, 
+      p_candidat_id: candidatId 
+    });
+
+    if (error) {
+      alert(error.message);
+    } else {
+      alert('Votre vote a été enregistré avec succès ! Merci pour votre participation.');
+      location.reload();
+    }
   }
-
-  document.getElementById('form-candidat').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const msg = document.getElementById('msg-admin');
-    const newC = {
-      nom_prenom: document.getElementById('c-nom').value,
-      photo_url: document.getElementById('c-photo').value,
-      profession: document.getElementById('c-prof').value,
-      programme: document.getElementById('c-prog').value,
-      ambition: document.getElementById('c-ambition').value
-    };
-    const { error } = await supabase.from('candidats').insert([newC]);
-    if (error) { msg.className = 'status-msg error'; msg.textContent = error.message; }
-    else { msg.className = 'status-msg success'; msg.textContent = 'Candidat ajouté !'; loadCandidats(); }
-    msg.style.display = 'block';
-  });
-
-  loadCandidats();
 </script>
 </body>
-  </html>
+</html>
