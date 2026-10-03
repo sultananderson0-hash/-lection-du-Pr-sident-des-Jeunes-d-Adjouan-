@@ -3,239 +3,260 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Administration — Élection Adjouan 2026</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background-color: #f0f4f8; color: #1c2d3d; padding: 20px 15px 40px; }
-    .container { max-width: 600px; margin: 0 auto; }
-    header { text-align: center; margin-bottom: 25px; }
-    header h1 { color: #0b6638; font-size: 1.5rem; }
-    header p { color: #4a5568; font-size: 0.9rem; }
-    .card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
-    .card h2 { color: #0b6638; font-size: 1.15rem; margin-bottom: 15px; }
-    label { display: block; font-weight: 600; font-size: 0.85rem; margin-top: 10px; margin-bottom: 4px; }
-    input, textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px; font-size: 0.9rem; }
-    button { background-color: #0b6638; color: white; border: none; padding: 10px 15px; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 0.9rem; margin-top: 12px; width: 100%; }
-    .btn-danger { background-color: #e53e3e; width: auto; padding: 4px 8px; font-size: 0.8rem; margin-top: 0; }
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85rem; }
-    th, td { text-align: left; padding: 10px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
-    th { background-color: #f7fafc; color: #4a5568; }
-    .badge { background: #e6f4ea; color: #0b6638; padding: 3px 8px; border-radius: 12px; font-weight: 700; font-size: 0.8rem; }
-    .candidate-img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; }
-    a.link-doc { color: #3182ce; text-decoration: none; font-weight: 600; }
-  </style>
+  <title>Administration - Élections 2026</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    * { box-sizing: border-box; font-family: Arial, sans-serif; }
+    body { background-color: #f4f6f9; margin: 0; padding: 20px; color: #333; }
+    .container { max-width: 900px; margin: 0 auto; }
+    h1, h2 { text-align: center; color: #1a365d; }
+    .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
+    .form-group { margin-bottom: 15px; }
+    label { display: block; margin-bottom: 5px; font-weight: bold; }
+    input[type="text"], input[type="file"], textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
+    button { background-color: #2b6cb0; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; }
+    button:hover { background-color: #2c5282; }
+    button:disabled { background-color: #a0aec0; cursor: not-allowed; }
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    th, td { border: 1px solid #e2e8f0; padding: 10px; text-align: left; }
+    th { background-color: #edf2f7; }
+    .btn-danger { background-color: #e53e3e; padding: 5px 10px; font-size: 0.9em; width: auto; }
+    .btn-danger:hover { background-color: #c53030; }
+    .img-preview { width: 50px; height: 50px; object-fit: cover; border-radius: 50%; }
+  </style>
 </head>
 <body>
 
-  <div class="container">
-    <header>
-      <h1>⚙️ Espace d'Administration</h1>
-      <p>Élection du Président des Jeunes d'Adjouan 2026</p>
-    </header>
+<div class="container">
+  <h1>⚙️️ Panneau d'Administration</h1>
 
-    <!-- SECTION 1 : RÉSULTATS -->
-    <div class="card">
-      <h2>🗳️ Résultats en direct</h2>
-      <div id="resultats-container">
-        <p style="color: #718096; font-size: 0.85rem;">Chargement du décompte...</p>
-      </div>
-      <button onclick="chargerDonnees()" style="background-color: #2b6cb0;">🔄 Rafraîchir les données</button>
-    </div>
-
-    <!-- SECTION 2 : GESTION DES CANDIDATS -->
-    <div class="card">
-      <h2>👥 Ajouter un Candidat</h2>
-      <form id="form-candidat" onsubmit="ajouterCandidat(event)">
-        <label>Nom & Prénom</label>
-        <input type="text" id="nom_candidat" placeholder="Ex: Yao Kouassi Denis" required>
-
-        <label>Profession / Occupations</label>
-        <input type="text" id="profession_candidat" placeholder="Ex: Étudiant en Droit / Entrepreneur">
-
-        <label>Ambitions & Vision pour la jeunesse</label>
-        <textarea id="ambition_candidat" rows="3" placeholder="Ex: Développer l'emploi des jeunes et organiser des tournois de sport..."></textarea>
-
-        <label>Photo du candidat (Format portrait)</label>
-        <input type="file" id="photo_candidat" accept="image/*" required>
-
-        <button type="submit" id="btn-ajouter">➕ Enregistrer le candidat</button>
-      </form>
-
-      <h2 style="margin-top: 25px;">Liste des candidats</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Photo</th>
-            <th>Candidat</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody id="liste-candidats">
-          <!-- Chargé dynamiquement -->
-        </tbody>
-      </table>
-    </div>
-
-    <!-- SECTION 3 : ÉLECTEURS -->
-    <div class="card">
-      <h2>🪪 Électeurs inscrits (<span id="total-electeurs">0</span>)</h2>
-      <div style="overflow-x: auto;">
-        <table>
-          <thead>
-            <tr>
-              <th>Nom</th>
-              <th>Pièce</th>
-              <th>Document</th>
-            </tr>
-          </thead>
-          <tbody id="liste-electeurs">
-            <!-- Chargé dynamiquement -->
-          </tbody>
-        </table>
-      </div>
-    </div>
-
+  <!-- RÉSULTATS -->
+  <div class="card">
+    <h2>📊 Résultats en direct</h2>
+    <div id="resultats-container">Chargement des résultats...</div>
+    <button onclick="chargerDonnees()" style="margin-top: 15px; background-color: #4a5568;">🔄 Rafraîchir les données</button>
   </div>
 
-  <script>
-    const SUPABASE_URL = 'https://qktfqpsqmcrgtmauntfj.supabase.co';
-    const SUPABASE_ANON_KEY = 'sb_publishable_45SBmGTiYtsCv5QEmYIovQ_WiAzSrCl';
-    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  <!-- AJOUT DE CANDIDAT -->
+  <div class="card">
+    <h2>👥 Ajouter un Candidat</h2>
+    <form id="form-candidat" onsubmit="ajouterCandidat(event)">
+      <div class="form-group">
+        <label for="nom_candidat">Nom et Prénom :</label>
+        <input type="text" id="nom_candidat" required placeholder="Ex: Kouamé N'diamoi Theodore">
+      </div>
+      <div class="form-group">
+        <label for="profession_candidat">Profession :</label>
+        <input type="text" id="profession_candidat" required placeholder="Ex: Enseignant">
+      </div>
+      <div class="form-group">
+        <label for="ambition_candidat">Ambition / Message :</label>
+        <textarea id="ambition_candidat" rows="3" required placeholder="Ex: Développer les infrastructures locales..."></textarea>
+      </div>
+      <div class="form-group">
+        <label for="photo_candidat">Photo de profil :</label>
+        <input type="file" id="photo_candidat" accept="image/*" required>
+      </div>
+      <button type="submit" id="btn-ajouter">➕ Enregistrer le candidat</button>
+    </form>
+  </div>
 
-    async function chargerDonnees() {
-      chargerCandidatsAdmin();
-      chargerElecteurs();
-      chargerResultats();
+  <!-- LISTE DES CANDIDATS -->
+  <div class="card">
+    <h2>Liste des candidats</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Photo</th>
+          <th>Candidat</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="liste-candidats">
+        <!-- Rempli en JS -->
+      </tbody>
+    </table>
+  </div>
+
+  <!-- LISTE DES ÉLECTEURS -->
+  <div class="card">
+    <h2>📋 Électeurs Inscrits (<span id="total-electeurs">0</span>)</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Nom & Prénom</th>
+          <th>Type Pièce</th>
+          <th>Pièce</th>
+        </tr>
+      </thead>
+      <tbody id="liste-electeurs">
+        <!-- Rempli en JS -->
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  // CONFIGURATION SUPABASE (Remplace avec tes clés exactes si besoin)
+  const SUPABASE_URL = 'https://qktfqpsmqcrgtmauxvyk.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrdGZxcHNtcGNyZ3RtYXV4dnlrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyNjM5ODcsImV4cCI6MjA1NjgzOTk4N30.K9vT3fXqX...'; 
+
+  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // CHARGER TOUTES LES DONNÉES
+  async function chargerDonnees() {
+    await chargerCandidats();
+    await chargerElecteurs();
+    await chargerResultats();
+  }
+
+  // 1. CHARGER LA LISTE DES CANDIDATS
+  async function chargerCandidats() {
+    const tbody = document.getElementById('liste-candidats');
+    tbody.innerHTML = '';
+    
+    const { data: candidats, error } = await supabaseClient.from('candidats').select('*');
+    if (error) {
+      console.error(error);
+      return;
     }
 
-    async function chargerCandidatsAdmin() {
-      const tbody = document.getElementById('liste-candidats');
-      const { data: candidats } = await supabaseClient.from('candidats').select('*');
-      
-      tbody.innerHTML = '';
-      if (candidats) {
-        candidats.forEach(c => {
-          const imgUrl = c.photo_url || 'https://via.placeholder.com/45';
-          tbody.innerHTML += `
-            <tr>
-              <td><img src="${imgUrl}" class="candidate-img" alt="${c.nom_prenom}"></td>
-              <td>
-                <strong>${c.nom_prenom}</strong><br>
-                <small style="color:#718096;">${c.profession || ''}</small>
-              </td>
-              <td><button class="btn-danger" onclick="supprimerCandidat(${c.id})">Supprimer</button></td>
-            </tr>
-          `;
-        });
-      }
-    }
-
-    async function ajouterCandidat(e) {
-      e.preventDefault();
-      const nom = document.getElementById('nom_candidat').value;
-      const profession = document.getElementById('profession_candidat').value;
-      const ambition = document.getElementById('ambition_candidat').value;
-      const fileInput = document.getElementById('photo_candidat');
-      const btn = document.getElementById('btn-ajouter');
-
-      if (!fileInput.files || fileInput.files.length === 0) {
-        alert("Veuillez sélectionner une photo.");
-        return;
-      }
-
-      btn.disabled = true;
-      btn.textContent = "Téléversement en cours...";
-
-      try {
-        const file = fileInput.files[0];
-        const fileExt = file.name.split('.').pop();
-        const fileName = `candidat_${Date.now()}.${fileExt}`;
-
-        const { error: uploadError } = await supabaseClient.storage.from('pieces_identite').upload(fileName, file);
-        if (uploadError) throw uploadError;
-
-        const photoUrl = `${SUPABASE_URL}/storage/v1/object/public/pieces_identite/${fileName}`;
-
-        const { error: insertError } = await supabaseClient.from('candidats').insert([{
-          nom_prenom: nom,
-          profession: profession,
-          ambition: ambition,
-          photo_url: photoUrl
-        }]);
-
-        if (insertError) throw insertError;
-
-        document.getElementById('nom_candidat').value = '';
-        document.getElementById('profession_candidat').value = '';
-        document.getElementById('ambition_candidat').value = '';
-        fileInput.value = '';
-        chargerDonnees();
-
-      } catch (err) {
-        alert("Erreur : " + err.message);
-      } finally {
-        btn.disabled = false;
-        btn.textContent = "➕ Enregistrer le candidat";
-      }
-    }
-
-    async function supprimerCandidat(id) {
-      if (confirm("Voulez-vous vraiment supprimer ce candidat ?")) {
-        await supabaseClient.from('candidats').delete().eq('id', id);
-        chargerDonnees();
-      }
-    }
-
-    async function chargerElecteurs() {
-      const tbody = document.getElementById('liste-electeurs');
-      const totalSpan = document.getElementById('total-electeurs');
-      const { data: electeurs } = await supabaseClient.from('electeurs').select('*').order('created_at', { ascending: false });
-
-      tbody.innerHTML = '';
-      if (electeurs) {
-        totalSpan.textContent = electeurs.length;
-        electeurs.forEach(e => {
-          tbody.innerHTML += `
-            <tr>
-              <td>${e.nom_prenom}</td>
-              <td><span class="badge">${e.type_piece}</span></td>
-              <td><a href="${e.numero_piece}" target="_blank" class="link-doc">Voir photo 👁️</a></td>
-            </tr>
-          `;
-        });
-      }
-    }
-
-    async function chargerResultats() {
-      const container = document.getElementById('resultats-container');
-      const { data: votes } = await supabaseClient.from('votes').select('candidat_id');
-      const { data: candidats } = await supabaseClient.from('candidats').select('*');
-
-      if (!candidats || candidats.length === 0) {
-        container.innerHTML = '<p style="font-size:0.85rem;">Aucun candidat enregistré.</p>';
-        return;
-      }
-
-      const decompte = {};
-      candidats.forEach(c => decompte[c.id] = { nom: c.nom_prenom, voix: 0 });
-
-      if (votes) {
-        votes.forEach(v => {
-          if (decompte[v.candidat_id]) decompte[v.candidat_id].voix += 1;
-        });
-      }
-
-      let html = '<table><thead><tr><th>Candidat</th><th>Voix</th></tr></thead><tbody>';
-      Object.values(decompte).forEach(c => {
-        html += `<tr><td><strong>${c.nom}</strong></td><td><span class="badge">${c.voix} vote(s)</span></td></tr>`;
+    if (candidats) {
+      candidats.forEach(c => {
+        tbody.innerHTML += `
+          <tr>
+            <td><img src="${c.photo_url}" class="img-preview" alt="${c.nom_prenom}"></td>
+            <td><strong>${c.nom_prenom}</strong><br><small>${c.profession}</small></td>
+            <td><button class="btn-danger" onclick="supprimerCandidat('${c.id}')">Supprimer</button></td>
+          </tr>
+        `;
       });
-      html += '</tbody></table>';
+    }
+  }
 
-      container.innerHTML = html;
+  // 2. AJOUTER UN CANDIDAT (SÉCURISÉ AVEC GETPUBLICURL)
+  async function ajouterCandidat(e) {
+    e.preventDefault();
+    const nom = document.getElementById('nom_candidat').value;
+    const profession = document.getElementById('profession_candidat').value;
+    const ambition = document.getElementById('ambition_candidat').value;
+    const fileInput = document.getElementById('photo_candidat');
+    const btn = document.getElementById('btn-ajouter');
+
+    if (!fileInput.files || fileInput.files.length === 0) {
+      alert("Veuillez sélectionner une photo.");
+      return;
     }
 
-    chargerDonnees();
-  </script>
+    btn.disabled = true;
+    btn.textContent = "Téléversement en cours...";
+
+    try {
+      const file = fileInput.files[0];
+      const fileExt = file.name.split('.').pop();
+      const fileName = `candidat_${Date.now()}.${fileExt}`;
+
+      // Envoi de l'image
+      const { error: uploadError } = await supabaseClient.storage
+        .from('pieces_identite')
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      // Récupération de l'URL publique générée automatiquement par Supabase
+      const { data: urlData } = supabaseClient.storage
+        .from('pieces_identite')
+        .getPublicUrl(fileName);
+
+      const photoUrl = urlData.publicUrl;
+
+      // Insertion en base de données
+      const { error: insertError } = await supabaseClient.from('candidats').insert([{
+        nom_prenom: nom,
+        profession: profession,
+        ambition: ambition,
+        photo_url: photoUrl
+      }]);
+
+      if (insertError) throw insertError;
+
+      // Nettoyage du formulaire
+      document.getElementById('nom_candidat').value = '';
+      document.getElementById('profession_candidat').value = '';
+      document.getElementById('ambition_candidat').value = '';
+      fileInput.value = '';
+      chargerDonnees();
+
+    } catch (err) {
+      alert("Erreur : " + err.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "➕ Enregistrer le candidat";
+    }
+  }
+
+  // 3. SUPPRIMER UN CANDIDAT
+  async function supprimerCandidat(id) {
+    if (confirm("Voulez-vous vraiment supprimer ce candidat ?")) {
+      await supabaseClient.from('candidats').delete().eq('id', id);
+      chargerDonnees();
+    }
+  }
+
+  // 4. CHARGER LES ÉLECTEURS
+  async function chargerElecteurs() {
+    const tbody = document.getElementById('liste-electeurs');
+    const totalSpan = document.getElementById('total-electeurs');
+    tbody.innerHTML = '';
+
+    const { data: electeurs } = await supabaseClient.from('electeurs').select('*');
+    if (electeurs) {
+      totalSpan.textContent = electeurs.length;
+      electeurs.forEach(e => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${e.nom_prenom}</td>
+            <td><span class="badge">${e.type_piece}</span></td>
+            <td><a href="${e.numero_piece}" target="_blank">Voir pièce</a></td>
+          </tr>
+        `;
+      });
+    }
+  }
+
+  // 5. CHARGER LES RÉSULTATS
+  async function chargerResultats() {
+    const container = document.getElementById('resultats-container');
+    const { data: votes } = await supabaseClient.from('votes').select('*');
+    const { data: candidats } = await supabaseClient.from('candidats').select('*');
+
+    if (!candidats || candidats.length === 0) {
+      container.innerHTML = '<p>Aucun candidat enregistré.</p>';
+      return;
+    }
+
+    const decompte = {};
+    candidats.forEach(c => decompte[c.id] = { nom: c.nom_prenom, voix: 0 });
+
+    if (votes) {
+      votes.forEach(v => {
+        if (decompte[v.candidat_id]) decompte[v.candidat_id].voix++;
+      });
+    }
+
+    let html = '<table><thead><tr><th>Candidat</th><th>Nombre de Voix</th></tr></thead><tbody>';
+    Object.values(decompte).forEach(c => {
+      html += `<tr><td><strong>${c.nom}</strong></td><td>${c.voix} voix</td></tr>`;
+    });
+    html += '</tbody></table>';
+
+    container.innerHTML = html;
+  }
+
+  // Lancement initial
+  chargerDonnees();
+</script>
+
 </body>
 </html>
+        
