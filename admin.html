@@ -12,16 +12,16 @@
     header h1 { color: #0b6638; font-size: 1.5rem; }
     header p { color: #4a5568; font-size: 0.9rem; }
     .card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
-    .card h2 { color: #0b6638; font-size: 1.15rem; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; }
+    .card h2 { color: #0b6638; font-size: 1.15rem; margin-bottom: 15px; }
     label { display: block; font-weight: 600; font-size: 0.85rem; margin-top: 10px; margin-bottom: 4px; }
-    input { width: 100%; padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px; font-size: 0.9rem; }
+    input, textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px; font-size: 0.9rem; }
     button { background-color: #0b6638; color: white; border: none; padding: 10px 15px; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 0.9rem; margin-top: 12px; width: 100%; }
     .btn-danger { background-color: #e53e3e; width: auto; padding: 4px 8px; font-size: 0.8rem; margin-top: 0; }
     table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85rem; }
     th, td { text-align: left; padding: 10px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
     th { background-color: #f7fafc; color: #4a5568; }
     .badge { background: #e6f4ea; color: #0b6638; padding: 3px 8px; border-radius: 12px; font-weight: 700; font-size: 0.8rem; }
-    .candidate-img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+    .candidate-img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; }
     a.link-doc { color: #3182ce; text-decoration: none; font-weight: 600; }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -47,10 +47,16 @@
     <div class="card">
       <h2>👥 Ajouter un Candidat</h2>
       <form id="form-candidat" onsubmit="ajouterCandidat(event)">
-        <label>Nom & Prénom du candidat</label>
+        <label>Nom & Prénom</label>
         <input type="text" id="nom_candidat" placeholder="Ex: Yao Kouassi Denis" required>
 
-        <label>Photo du candidat</label>
+        <label>Profession / Occupations</label>
+        <input type="text" id="profession_candidat" placeholder="Ex: Étudiant en Droit / Entrepreneur">
+
+        <label>Ambitions & Vision pour la jeunesse</label>
+        <textarea id="ambition_candidat" rows="3" placeholder="Ex: Développer l'emploi des jeunes et organiser des tournois de sport..."></textarea>
+
+        <label>Photo du candidat (Format portrait)</label>
         <input type="file" id="photo_candidat" accept="image/*" required>
 
         <button type="submit" id="btn-ajouter">➕ Enregistrer le candidat</button>
@@ -61,7 +67,7 @@
         <thead>
           <tr>
             <th>Photo</th>
-            <th>Nom</th>
+            <th>Candidat</th>
             <th>Action</th>
           </tr>
         </thead>
@@ -71,7 +77,7 @@
       </table>
     </div>
 
-    <!-- SECTION 3 : LISTE DES ÉLECTEURS ET PIÈCES -->
+    <!-- SECTION 3 : ÉLECTEURS -->
     <div class="card">
       <h2>🪪 Électeurs inscrits (<span id="total-electeurs">0</span>)</h2>
       <div style="overflow-x: auto;">
@@ -110,11 +116,14 @@
       tbody.innerHTML = '';
       if (candidats) {
         candidats.forEach(c => {
-          const imgUrl = c.photo_url || 'https://via.placeholder.com/40';
+          const imgUrl = c.photo_url || 'https://via.placeholder.com/45';
           tbody.innerHTML += `
             <tr>
               <td><img src="${imgUrl}" class="candidate-img" alt="${c.nom_prenom}"></td>
-              <td><strong>${c.nom_prenom}</strong></td>
+              <td>
+                <strong>${c.nom_prenom}</strong><br>
+                <small style="color:#718096;">${c.profession || ''}</small>
+              </td>
               <td><button class="btn-danger" onclick="supprimerCandidat(${c.id})">Supprimer</button></td>
             </tr>
           `;
@@ -125,11 +134,13 @@
     async function ajouterCandidat(e) {
       e.preventDefault();
       const nom = document.getElementById('nom_candidat').value;
+      const profession = document.getElementById('profession_candidat').value;
+      const ambition = document.getElementById('ambition_candidat').value;
       const fileInput = document.getElementById('photo_candidat');
       const btn = document.getElementById('btn-ajouter');
 
       if (!fileInput.files || fileInput.files.length === 0) {
-        alert("Veuillez sélectionner une photo pour le candidat.");
+        alert("Veuillez sélectionner une photo.");
         return;
       }
 
@@ -141,28 +152,28 @@
         const fileExt = file.name.split('.').pop();
         const fileName = `candidat_${Date.now()}.${fileExt}`;
 
-        // Stockage dans le bucket 'pieces_identite'
-        const { error: uploadError } = await supabaseClient.storage
-          .from('pieces_identite')
-          .upload(fileName, file);
-
+        const { error: uploadError } = await supabaseClient.storage.from('pieces_identite').upload(fileName, file);
         if (uploadError) throw uploadError;
 
         const photoUrl = `${SUPABASE_URL}/storage/v1/object/public/pieces_identite/${fileName}`;
 
-        // Insertion en BDD
-        const { error: insertError } = await supabaseClient
-          .from('candidats')
-          .insert([{ nom_prenom: nom, photo_url: photoUrl }]);
+        const { error: insertError } = await supabaseClient.from('candidats').insert([{
+          nom_prenom: nom,
+          profession: profession,
+          ambition: ambition,
+          photo_url: photoUrl
+        }]);
 
         if (insertError) throw insertError;
 
         document.getElementById('nom_candidat').value = '';
+        document.getElementById('profession_candidat').value = '';
+        document.getElementById('ambition_candidat').value = '';
         fileInput.value = '';
         chargerDonnees();
 
       } catch (err) {
-        alert("Erreur lors de l'ajout : " + err.message);
+        alert("Erreur : " + err.message);
       } finally {
         btn.disabled = false;
         btn.textContent = "➕ Enregistrer le candidat";
@@ -211,9 +222,7 @@
 
       if (votes) {
         votes.forEach(v => {
-          if (decompte[v.candidat_id]) {
-            decompte[v.candidat_id].voix += 1;
-          }
+          if (decompte[v.candidat_id]) decompte[v.candidat_id].voix += 1;
         });
       }
 
