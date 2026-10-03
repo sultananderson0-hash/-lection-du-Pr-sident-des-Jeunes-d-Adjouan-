@@ -8,6 +8,8 @@ const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let currentElecteurId = null;
 let currentElecteurNom = null;
+let DATE_OUVERTURE = null;
+let DATE_FERMETURE = null;
 
 // ==========================================
 // NAVIGATION
@@ -22,31 +24,54 @@ function afficherPage(idPage) {
 }
 
 // ==========================================
-// GESTION DU SCRUTIN (DATES DE TEST)
+// GESTION DU SCRUTIN (LECTURE DEPUIS SUPABASE)
 // ==========================================
-// ⚠️ DATES DE TEST - Le vote est ouvert
-const DATE_OUVERTURE = new Date("2026-01-01T08:00:00"); 
-const DATE_FERMETURE = new Date("2026-12-31T18:00:00");
+async function chargerDatesDepuisSupabase() {
+    try {
+        const { data, error } = await supabase
+            .from('election_config')
+            .select('*')
+            .eq('id', 1)
+            .single();
 
-function verifierStatutScrutin() {
-    const maintenant = new Date();
+        if (error || !data) {
+            console.error("Erreur de lecture des dates :", error);
+            return false;
+        }
+
+        DATE_OUVERTURE = new Date(data.date_debut);
+        DATE_FERMETURE = new Date(data.date_fin);
+        return true;
+    } catch (e) {
+        console.error("Erreur :", e);
+        return false;
+    }
+}
+
+async function verifierStatutScrutin() {
     const btnVoter = document.getElementById('btn-voter');
     const badge = document.getElementById('badge-statut');
     const msg = document.getElementById('message-statut');
 
     if(!btnVoter) return;
 
+    // On charge les dates depuis Supabase
+    const ok = await chargerDatesDepuisSupabase();
+    if (!ok) return;
+
+    const maintenant = new Date();
+
     if (maintenant < DATE_OUVERTURE) {
         badge.className = "status-badge status-waiting";
         badge.innerText = "⏳ Scrutin non ouvert";
-        msg.innerText = "Le vote ouvrira le 11 Octobre 2026 à 08h00.";
+        msg.innerText = `Le vote ouvrira le ${DATE_OUVERTURE.toLocaleDateString('fr-FR')} à ${DATE_OUVERTURE.toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'})}.`;
         btnVoter.disabled = true;
         btnVoter.innerText = "🔒 Vote fermé";
         btnVoter.style.opacity = "0.5";
     } else if (maintenant >= DATE_OUVERTURE && maintenant < DATE_FERMETURE) {
         badge.className = "status-badge status-open";
-        badge.innerText = "✅ Scrutin ouvert (TEST)";
-        msg.innerText = "Le vote est en cours (phase de test).";
+        badge.innerText = "✅ Scrutin ouvert";
+        msg.innerText = `Le vote est en cours. Clôture le ${DATE_FERMETURE.toLocaleDateString('fr-FR')} à ${DATE_FERMETURE.toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'})}.`;
         btnVoter.disabled = false;
         btnVoter.innerText = "🗳️ Je veux voter";
         btnVoter.style.opacity = "1";
@@ -60,7 +85,10 @@ function verifierStatutScrutin() {
     }
 }
 
-function verifierOuverture() {
+async function verifierOuverture() {
+    if (!DATE_OUVERTURE || !DATE_FERMETURE) {
+        await chargerDatesDepuisSupabase();
+    }
     const maintenant = new Date();
     if (maintenant >= DATE_OUVERTURE && maintenant < DATE_FERMETURE) {
         afficherPage('page-inscription');
@@ -245,10 +273,11 @@ async function voirElecteurs() {
 // ==========================================
 // INITIALISATION
 // ==========================================
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     if (document.getElementById('page-accueil')) {
+        await chargerDatesDepuisSupabase(); // On charge les dates une fois au démarrage
         verifierStatutScrutin();
-        setInterval(verifierStatutScrutin, 60000);
+        setInterval(verifierStatutScrutin, 60000); // Puis on vérifie toutes les minutes
     }
     if (document.getElementById('page-admin-dashboard')) {
         mettreAJourDashboard();
