@@ -230,7 +230,7 @@
     <div id="page-accueil">
       <div class="card">
         <h2 class="card-title" style="justify-content: center;">
-          📫 Votre voix compte
+          📬 Votre voix compte
         </h2>
         <p class="card-subtitle">
           Participez à l'élection du Président<br>des Jeunes d'Adjouan 2026.
@@ -327,7 +327,7 @@
   </div>
 
   <script>
-    // Remplace par tes véritables clés Supabase
+    // Identifiants de ton projet Supabase
     const SUPABASE_URL = 'https://gjoxpvatxxexuzxyhgqm.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_45SBmGTiYtsCv5QEmYIovQ_WiAzSrCl';
 
@@ -383,7 +383,7 @@
       const { data: candidats, error } = await supabaseClient.from('candidats').select('*');
 
       if (error || !candidats || candidats.length === 0) {
-        container.innerHTML = '<p style="font-size:0.9rem;">Aucun candidat disponible.</p>';
+        container.innerHTML = '<p style="font-size:0.9rem;">Aucun candidat disponible pour le moment.</p>';
         return;
       }
 
@@ -430,7 +430,7 @@
       btn.textContent = 'Enregistrement en cours...';
 
       try {
-        // 1. Upload de la photo
+        // 1. Envoi de la photo de la pièce d'identité vers le Storage
         const file = fileInput.files[0];
         const fileExt = file.name.split('.').pop();
         const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
@@ -443,7 +443,7 @@
 
         const photoUrl = `${SUPABASE_URL}/storage/v1/object/public/pieces_identite/${fileName}`;
 
-        // 2. Création de l'électeur
+        // 2. Enregistrement de l'électeur dans la table 'electeurs'
         const { data: electeur, error: electeurError } = await supabaseClient.from('electeurs').insert([{
           nom_prenom: nom,
           date_naissance: dateN,
@@ -454,7 +454,7 @@
 
         if (electeurError) throw electeurError;
 
-        // 3. Enregistrement du vote
+        // 3. Comptabilisation du vote sécurisé
         const { error: voteError } = await supabaseClient.rpc('enregistrer_vote', {
           p_electeur_id: electeur.id,
           p_candidat_id: radioCandidat.value
@@ -473,8 +473,9 @@
       }
     }
 
-    // Vérification automatique au chargement
+    // Vérification du statut du scrutin au chargement de la page
     verifierStatutScrutin();
   </script>
 </body>
-</html>
+  </html>
+  
