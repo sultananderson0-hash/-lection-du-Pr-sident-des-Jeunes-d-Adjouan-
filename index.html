@@ -16,8 +16,8 @@
 
   <main class="container">
 
-    <!-- Section 1 : Accueil / Action principale -->
-    <section class="card">
+    <!-- Section 1 : Accueil -->
+    <section class="card" id="section-accueil">
       <div class="card-header">
         <span class="icon">🗳️</span>
         <h2>Votre voix compte</h2>
@@ -29,17 +29,79 @@
       </button>
     </section>
 
-    <!-- Section 2 : Affichage dynamique des candidats (Inséré au milieu) -->
-    <section class="card" id="section-candidats">
-      <div class="card-header">
-        <span class="icon">👥</span>
-        <h2>Candidats officiels</h2>
-      </div>
+    <!-- Section 2 : Espace de Vote en 2 étapes -->
+    <section class="card hidden" id="section-formulaire-vote">
       
-      <!-- Les candidats ajoutés par l'administrateur s'afficheront ici -->
-      <div id="candidats-container" class="candidats-grid">
-        <!-- Généré dynamiquement par JavaScript -->
+      <!-- ÉTAPE 1 : Renseigner les informations -->
+      <div id="etape-1-infos">
+        <div class="card-header">
+          <span class="icon">📝</span>
+          <h2>Étape 1 : Vos Informations</h2>
+        </div>
+
+        <form id="form-etape-1">
+          <div class="form-group">
+            <label for="nom-prenoms">Nom et Prénom(s) :</label>
+            <input type="text" id="nom-prenoms" placeholder="Ex: Kouadio Jean" required>
+          </div>
+
+          <div class="form-group">
+            <label for="dob">Date de naissance :</label>
+            <input type="date" id="dob" required>
+          </div>
+
+          <div class="form-group">
+            <label for="type-document">Type de document d'identité :</label>
+            <select id="type-document" required>
+              <option value="">-- Sélectionnez un document --</option>
+              <option value="cni">Carte Nationale d'Identité</option>
+              <option value="extrait">Extrait / Acte de naissance</option>
+              <option value="scolaire">Carte scolaire</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="file-document">Photo ou scan de la pièce :</label>
+            <input type="file" id="file-document" accept="image/*,.pdf" required>
+          </div>
+
+          <button type="button" class="btn btn-primary" id="btn-vers-etape-2">
+            Continuer vers les candidats ➔
+          </button>
+          <button type="button" class="btn btn-secondary" id="btn-retour-accueil">
+            ← Retour
+          </button>
+        </form>
       </div>
+
+      <!-- ÉTAPE 2 : Choix du candidat et validation -->
+      <div id="etape-2-candidats" class="hidden">
+        <div class="card-header">
+          <span class="icon">🗳️</span>
+          <h2>Étape 2 : Choisissez votre candidat</h2>
+        </div>
+
+        <form id="form-etape-2">
+          <!-- Zone d'affichage des candidats -->
+          <div class="form-group">
+            <div id="radio-candidats-container" class="radio-list"></div>
+          </div>
+
+          <div class="alert alert-warning">
+            ⚠️ <strong>Attention :</strong> une fois validé, votre vote est définitif et ne pourra pas être modifié.
+          </div>
+
+          <button type="submit" class="btn btn-primary" id="btn-valider-vote">
+            🗳️ Confirmer mon vote
+          </button>
+          <button type="button" class="btn btn-secondary" id="btn-retour-etape-1">
+            ← Modifier mes informations
+          </button>
+        </form>
+      </div>
+
+      <!-- Message d'erreur ou de succès -->
+      <div id="vote-message" class="message-box hidden"></div>
     </section>
 
     <!-- Section 3 : Conditions pour voter -->
@@ -55,63 +117,7 @@
       </ul>
     </section>
 
-    <!-- Section 4 : Formulaire de Vote (Masqué par défaut) -->
-    <section class="card hidden" id="section-formulaire-vote">
-      <div class="card-header">
-        <span class="icon">📄</span>
-        <h2>Vérification et Vote</h2>
-      </div>
-
-      <form id="vote-form">
-        <!-- Sélection de la pièce -->
-        <div class="form-group">
-          <label for="type-document">Type de document :</label>
-          <select id="type-document" required>
-            <option value="">-- Sélectionnez un document --</option>
-            <option value="cni">Carte Nationale d'Identité</option>
-            <option value="extrait">Extrait / Acte de naissance</option>
-            <option value="scolaire">Carte scolaire</option>
-          </select>
-        </div>
-
-        <!-- Date de naissance pour vérification de l'âge -->
-        <div class="form-group">
-          <label for="dob">Votre date de naissance :</label>
-          <input type="date" id="dob" required>
-        </div>
-
-        <!-- Pièce justificative -->
-        <div class="form-group">
-          <label for="file-document">Photo ou fichier du document :</label>
-          <input type="file" id="file-document" accept="image/*,.pdf" required>
-        </div>
-
-        <!-- Choix du candidat -->
-        <div class="form-group">
-          <label>Choisissez votre candidat :</label>
-          <div id="radio-candidats-container" class="radio-list">
-            <!-- Choix générés dynamiquement -->
-          </div>
-        </div>
-
-        <!-- Avertissement -->
-        <div class="alert alert-warning">
-          ⚠️ <strong>Attention :</strong> après validation, votre vote ne pourra pas être modifié. Un électeur ne peut voter qu'une seule fois.
-        </div>
-
-        <button type="submit" class="btn btn-primary">
-          🗳️ Confirmer mon choix
-        </button>
-        <button type="button" class="btn btn-secondary" id="btn-retour">
-          ← Retour à l'accueil
-        </button>
-      </form>
-
-      <!-- Zone de message d'erreur / succès -->
-      <div id="vote-message" class="message-box hidden"></div>
-    </section>
-
-    <!-- Section 5 : Pièces acceptées -->
+    <!-- Section 4 : Pièces acceptées -->
     <section class="card">
       <div class="card-header">
         <span class="icon">💳</span>
@@ -124,19 +130,14 @@
       </ul>
     </section>
 
-    <!-- Section 6 : Vote depuis l'étranger -->
+    <!-- Section 5 : Vote depuis l'étranger -->
     <section class="card">
       <div class="card-header">
         <span class="icon">🌍</span>
         <h2>Vote depuis l'étranger</h2>
       </div>
-      <p>Les jeunes d'Adjouan qui se trouvent à l'étranger pourront également participer au vote selon les conditions prévues par l'organisation de l'élection.</p>
+      <p>Les jeunes d'Adjouan qui se trouvent à l'étranger pourront également participer au vote selon les conditions prévues par l'organisation.</p>
     </section>
-
-    <!-- Section 7 : Alerte de sécurité -->
-    <div class="alert alert-important">
-      ⚠️ <strong>Important :</strong> chaque électeur ne peut voter qu'une seule fois.
-    </div>
 
   </main>
 
@@ -144,6 +145,6 @@
     Élection du Président des Jeunes d'Adjouan — 2026
   </footer>
 
-  <script src="script.js"></script>
+  <script src="scripts.js"></script>
 </body>
 </html>
