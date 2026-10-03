@@ -1,35 +1,32 @@
-// Données de démonstration (Exemple de candidats ajoutés par l'administrateur)
-const candidats = [
-  { id: 1, nom: "Kouassi Jean", numero: "N° 1" },
-  { id: 2, nom: "Konan Awa", numero: "N° 2" },
-  { id: 3, nom: "Yao N'Guessan", numero: "N° 3" }
-];
+// La liste est vide car aucun candidat n'est encore inscrit
+const candidats = [];
 
 // Éléments du DOM
 const btnVoter = document.getElementById("btn-voter");
 const btnRetour = document.getElementById("btn-retour");
 const sectionFormulaire = document.getElementById("section-formulaire-vote");
-const sectionCandidats = document.getElementById("section-candidats");
 const candidatsContainer = document.getElementById("candidats-container");
 const radioCandidatsContainer = document.getElementById("radio-candidats-container");
 const voteForm = document.getElementById("vote-form");
 const voteMessage = document.getElementById("vote-message");
 
-// Initialisation au chargement de la page
+// Lancement au chargement de la page
 document.addEventListener("DOMContentLoaded", () => {
-  afficherCandidatsAccueil();
-  afficherCandidatsFormulaire();
+  if (candidatsContainer) afficherCandidatsAccueil();
+  if (radioCandidatsContainer) afficherCandidatsFormulaire();
 });
 
-// Afficher la liste des candidats entre "Je veux voter" et "Conditions pour voter"
+// 1. Afficher sur la page d'accueil
 function afficherCandidatsAccueil() {
   candidatsContainer.innerHTML = "";
   
   if (candidats.length === 0) {
-    candidatsContainer.innerHTML = "<p>Aucun candidat n'a encore été ajouté par l'administrateur.</p>";
+    // Affiche ton message s'il n'y a pas de candidat
+    candidatsContainer.innerHTML = "<p style='text-align: center; font-style: italic; color: #64748b; padding: 10px;'>Pas de candidat inscrit pour le moment</p>";
     return;
   }
 
+  // (Le code pour afficher les candidats plus tard restera ici en attente)
   candidats.forEach(candidat => {
     const card = document.createElement("div");
     card.className = "candidat-card";
@@ -43,10 +40,16 @@ function afficherCandidatsAccueil() {
   });
 }
 
-// Générer la liste d'options radio dans le formulaire de vote
+// 2. Afficher dans le formulaire de vote
 function afficherCandidatsFormulaire() {
   radioCandidatsContainer.innerHTML = "";
   
+  if (candidats.length === 0) {
+    // Affiche ton message dans le formulaire
+    radioCandidatsContainer.innerHTML = "<p style='font-style: italic; color: #64748b;'>Pas de candidat inscrit pour le moment</p>";
+    return;
+  }
+
   candidats.forEach((candidat, index) => {
     const label = document.createElement("label");
     label.className = "radio-item";
@@ -58,19 +61,23 @@ function afficherCandidatsFormulaire() {
   });
 }
 
-// Gestion des boutons
-btnVoter.addEventListener("click", () => {
-  sectionFormulaire.classList.remove("hidden");
-  sectionFormulaire.scrollIntoView({ behavior: "smooth" });
-});
+// Boutons "Je veux voter" et "Retour"
+if (btnVoter) {
+  btnVoter.addEventListener("click", () => {
+    sectionFormulaire.classList.remove("hidden");
+    sectionFormulaire.scrollIntoView({ behavior: "smooth" });
+  });
+}
 
-btnRetour.addEventListener("click", () => {
-  sectionFormulaire.classList.add("hidden");
-  voteMessage.classList.add("hidden");
-  window.scrollTo({ top: 0, behavior: "smooth" });
-});
+if (btnRetour) {
+  btnRetour.addEventListener("click", () => {
+    sectionFormulaire.classList.add("hidden");
+    voteMessage.classList.add("hidden");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+}
 
-// Calcul strict de l'âge
+// Système de vérification de l'âge (15 à 40 ans)
 function calculerAge(dateNaissance) {
   const aujourdhui = new Date();
   const dateNaissanceObj = new Date(dateNaissance);
@@ -83,38 +90,42 @@ function calculerAge(dateNaissance) {
   return age;
 }
 
-// Validation du formulaire de vote
-voteForm.addEventListener("submit", (e) => {
-  e.preventDefault();
-  
-  voteMessage.classList.add("hidden");
-  voteMessage.className = "message-box hidden";
+if (voteForm) {
+  voteForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    
+    // Bloquer le vote s'il n'y a pas de candidat
+    if (candidats.length === 0) {
+       afficherMessage("Impossible de voter : aucun candidat n'est inscrit pour le moment.", "error");
+       return;
+    }
 
-  const dobInput = document.getElementById("dob").value;
-  if (!dobInput) {
-    afficherMessage("Veuillez entrer votre date de naissance.", "error");
-    return;
-  }
+    voteMessage.classList.add("hidden");
+    voteMessage.className = "message-box hidden";
 
-  const age = calculerAge(dobInput);
+    const dobInput = document.getElementById("dob").value;
+    if (!dobInput) {
+      afficherMessage("Veuillez entrer votre date de naissance.", "error");
+      return;
+    }
 
-  // Vérification de la condition d'âge (15 à 40 ans)
-  if (age < 15 || age > 40) {
-    afficherMessage(
-      `❌ Vote non autorisé : Vous avez ${age} ans. Pour voter, vous devez avoir entre 15 et 40 ans.`, 
-      "error"
-    );
-    return;
-  }
+    const age = calculerAge(dobInput);
 
-  // Si l'âge est valide
-  afficherMessage("✅ Votre vote a été enregistré avec succès !", "success");
-  
-  // Réinitialisation après succès
-  setTimeout(() => {
-    voteForm.reset();
-  }, 2000);
-});
+    if (age < 15 || age > 40) {
+      afficherMessage(
+        `❌ Vote non autorisé : Vous avez ${age} ans. Pour voter, vous devez avoir entre 15 et 40 ans.`, 
+        "error"
+      );
+      return;
+    }
+
+    afficherMessage("✅ Votre vote a été enregistré avec succès !", "success");
+    
+    setTimeout(() => {
+      voteForm.reset();
+    }, 2000);
+  });
+}
 
 function afficherMessage(message, type) {
   voteMessage.textContent = message;
