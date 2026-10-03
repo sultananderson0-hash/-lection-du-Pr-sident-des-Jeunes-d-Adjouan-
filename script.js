@@ -1,118 +1,266 @@
-document.addEventListener("DOMContentLoaded", () => {
-  // === RÉCUPÉRATION DES ÉLÉMENTS DE LA PAGE ===
-  const btnVoter = document.getElementById("btn-voter");
-  const sectionFormulaire = document.getElementById("section-formulaire-vote");
-  
-  const etape1 = document.getElementById("etape-1-infos");
-  const etape2 = document.getElementById("etape-2-candidats");
-  
-  const btnVersEtape2 = document.getElementById("btn-vers-etape-2");
-  const btnRetourEtape1 = document.getElementById("btn-retour-etape-1");
-  const btnRetourAccueil = document.getElementById("btn-retour-accueil");
-  
-  const radioCandidatsContainer = document.getElementById("radio-candidats-container");
-  const formEtape2 = document.getElementById("form-etape-2");
-  const voteMessage = document.getElementById("vote-message");
+// ==========================================
+// CONFIGURATION SUPABASE
+// ==========================================
+const SUPABASE_URL = 'https://qktfqpsqmcrgtmauntfj.supabase.co'; // Remplacez ceci
+const SUPABASE_KEY = 'sb_publishable_45SBmGTiYtsCv5QEmYIovQ_WiAzSrCl'; // Remplacez ceci
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  // === 1. ACTION DU BOUTON VERT "JE VEUX VOTER" ===
-  if (btnVoter && sectionFormulaire) {
-    btnVoter.addEventListener("click", () => {
-      sectionFormulaire.classList.remove("hidden"); // Affiche la section
-      
-      if (etape1) etape1.classList.remove("hidden");
-      if (etape2) etape2.classList.add("hidden");
-      if (voteMessage) voteMessage.classList.add("hidden");
-      
-      // Fait défiler l'écran vers le formulaire doucement
-      sectionFormulaire.scrollIntoView({ behavior: "smooth" });
-    });
-  }
+// Variables globales
+let currentElecteurId = null;
+let currentElecteurNom = null;
 
-  // === CALCUL DE L'ÂGE ===
-  function calculerAge(dateNaissance) {
-    const aujourdhui = new Date();
-    const dateNaissanceObj = new Date(dateNaissance);
-    let age = aujourdhui.getFullYear() - dateNaissanceObj.getFullYear();
-    const moisDiff = aujourdhui.getMonth() - dateNaissanceObj.getMonth();
-    
-    if (moisDiff < 0 || (moisDiff === 0 && aujourdhui.getDate() < dateNaissanceObj.getDate())) {
-      age--;
+// ==========================================
+// FONCTIONS DE NAVIGATION
+// ==========================================
+function afficherPage(idPage) {
+    document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+    const pageActive = document.getElementById(idPage);
+    if (pageActive) {
+        pageActive.classList.add('active');
+        window.scrollTo(0, 0);
     }
-    return age;
-  }
+}
 
-  // === GESTION DES MESSAGES D'ERREUR ===
-  function afficherMessage(message, type) {
-    if (!voteMessage) return;
-    voteMessage.textContent = message;
-    voteMessage.className = `message-box ${type}`;
-    voteMessage.classList.remove("hidden");
-  }
+// ==========================================
+// GESTION DU SCRUTIN (TEMPS)
+// ==========================================
+// Les dates sont figées ici comme demandé
+const DATE_OUVERTURE = new Date("2026-10-11T08:00:00"); 
+const DATE_FERMETURE = new Date("2026-10-11T18:00:00");
 
-  // === 2. BOUTON "CONTINUER VERS LES CANDIDATS" (ÉTAPE 1 -> ÉTAPE 2) ===
-  if (btnVersEtape2) {
-    btnVersEtape2.addEventListener("click", () => {
-      if (voteMessage) voteMessage.classList.add("hidden");
+function verifierStatutScrutin() {
+    const maintenant = new Date();
+    const btnVoter = document.getElementById('btn-voter');
+    const badge = document.getElementById('badge-statut');
+    const msg = document.getElementById('message-statut');
 
-      // Récupérer les valeurs des champs
-      const nomPrenoms = document.getElementById("nom-prenoms") ? document.getElementById("nom-prenoms").value.trim() : "";
-      const dobInput = document.getElementById("dob") ? document.getElementById("dob").value : "";
-      const typeDoc = document.getElementById("type-document") ? document.getElementById("type-document").value : "";
-      const fileDocElement = document.getElementById("file-document");
-      const fileDoc = (fileDocElement && fileDocElement.files) ? fileDocElement.files.length : 0;
+    if(!btnVoter) return; // Si on est sur la page admin
 
-      // Vérifier que tout est rempli
-      if (!nomPrenoms || !dobInput || !typeDoc || fileDoc === 0) {
-        afficherMessage("Veuillez remplir tous les champs et ajouter votre document.", "error");
+    if (maintenant < DATE_OUVERTURE) {
+        badge.className = "status-badge status-waiting";
+        badge.innerText = "⏳ Scrutin non ouvert";
+        msg.innerText = "Le vote ouvrira le 11 Octobre 2026 à 08h00.";
+        btnVoter.disabled = true;
+        btnVoter.innerText = "🔒 Vote fermé";
+        btnVoter.style.opacity = "0.5";
+    } else if (maintenant >= DATE_OUVERTURE && maintenant < DATE_FERMETURE) {
+        badge.className = "status-badge status-open";
+        badge.innerText = "✅ Scrutin ouvert";
+        msg.innerText = "Le vote est en cours. Clôture à 18h00.";
+        btnVoter.disabled = false;
+        btnVoter.innerText = "🗳️ Je veux voter";
+        btnVoter.style.opacity = "1";
+    } else {
+        badge.className = "status-badge status-closed";
+        badge.innerText = "🔒 Scrutin fermé";
+        msg.innerText = "Le vote est terminé. Merci de votre participation.";
+        btnVoter.disabled = true;
+        btnVoter.innerText = "🔒 Vote fermé";
+        btnVoter.style.opacity = "0.5";
+    }
+}
+
+function verifierOuverture() {
+    const maintenant = new Date();
+    if (maintenant >= DATE_OUVERTURE && maintenant < DATE_FERMETURE) {
+        afficherPage('page-inscription');
+    } else {
+        alert("Le vote n'est pas ouvert actuellement.");
+    }
+}
+
+// ==========================================
+// CÔTÉ ÉLECTEUR (INSCRIPTION ET VOTE)
+// ==========================================
+async function validerInscription(event) {
+    event.preventDefault();
+    const nom = document.getElementById('nom').value;
+    const date_naissance = document.getElementById('date_naissance').value;
+    const type_piece = document.getElementById('type_piece').value;
+    const numero_piece = document.getElementById('numero_piece').value;
+
+    // Vérifier si l'électeur existe déjà (par numéro de pièce)
+    const { data: existant, error: errCheck } = await supabase
+        .from('electeurs')
+        .select('*')
+        .eq('numero_piece', numero_piece)
+        .single();
+
+    if (existant) {
+        alert("Cet électeur est déjà inscrit !");
         return;
-      }
+    }
 
-      // Vérifier la condition d'âge
-      const age = calculerAge(dobInput);
-      if (age < 15 || age > 40) {
-        afficherMessage(`❌ Vote non autorisé : Vous avez ${age} ans. Seules les personnes de 15 à 40 ans peuvent voter.`, "error");
+    // Insérer le nouvel électeur
+    const { data, error } = await supabase
+        .from('electeurs')
+        .insert([{ 
+            nom_prenom: nom, 
+            date_naissance: date_naissance, 
+            type_piece: type_piece, 
+            numero_piece: numero_piece,
+            est_verifie: false,
+            a_vote: false
+        }])
+        .select();
+
+    if (error) {
+        alert("Erreur lors de l'inscription : " + error.message);
         return;
-      }
+    }
 
-      // Si tout est bon, on affiche l'étape 2
-      if (etape1) etape1.classList.add("hidden");
-      if (etape2) etape2.classList.remove("hidden");
+    // Sauvegarder l'ID de l'électeur pour le vote
+    currentElecteurId = data[0].id;
+    currentElecteurNom = data[0].nom_prenom;
 
-      // Afficher le message d'absence de candidat
-      if (radioCandidatsContainer) {
-        radioCandidatsContainer.innerHTML = `
-          <p style="text-align: center; color: #64748b; font-style: italic; padding: 15px;">
-            Pas de candidat inscrit pour le moment
-          </p>
+    document.getElementById('message-bienvenue').innerText = `Bienvenue ${nom}, veuillez choisir votre candidat.`;
+    afficherPage('page-vote');
+    chargerCandidatsPourVote();
+}
+
+async function chargerCandidatsPourVote() {
+    const container = document.getElementById('liste-candidats');
+    container.innerHTML = '<p>Chargement des candidats...</p>';
+
+    const { data: candidats, error } = await supabase.from('candidats').select('*');
+
+    if (error || candidats.length === 0) {
+        container.innerHTML = '<p style="color:red;">Aucun candidat n\'a été enregistré.</p>';
+        return;
+    }
+
+    container.innerHTML = '';
+    candidats.forEach((cand) => {
+        const div = document.createElement('label');
+        div.className = 'candidat-card';
+        div.innerHTML = `
+            <input type="radio" name="candidat" value="${cand.id}" required style="display:none;">
+            <img src="${cand.photo_url}" alt="${cand.nom_prenom}" class="candidat-photo">
+            <div class="candidat-nom">${cand.nom_prenom}</div>
+            <div class="candidat-info">${cand.profession}</div>
+            <div class="candidat-message">"${cand.programme}"</div>
         `;
-      }
+        div.addEventListener('click', () => {
+            document.querySelectorAll('.candidat-card').forEach(c => c.classList.remove('selected'));
+            div.classList.add('selected');
+            div.querySelector('input[type="radio"]').checked = true;
+        });
+        container.appendChild(div);
     });
-  }
+}
 
-  // === 3. BOUTONS DE RETOUR ===
-  if (btnRetourAccueil) {
-    btnRetourAccueil.addEventListener("click", () => {
-      if (sectionFormulaire) sectionFormulaire.classList.add("hidden");
-      if (voteMessage) voteMessage.classList.add("hidden");
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    });
-  }
+async function validerVote(event) {
+    event.preventDefault();
+    const candidatSelectionne = document.querySelector('input[name="candidat"]:checked');
+    
+    if (!candidatSelectionne) {
+        alert("Veuillez sélectionner un candidat.");
+        return;
+    }
 
-  if (btnRetourEtape1) {
-    btnRetourEtape1.addEventListener("click", () => {
-      if (etape2) etape2.classList.add("hidden");
-      if (etape1) etape1.classList.remove("hidden");
-      if (voteMessage) voteMessage.classList.add("hidden");
-    });
-  }
+    const candidatId = candidatSelectionne.value;
+    const candidatNom = candidatSelectionne.closest('.candidat-card').querySelector('.candidat-nom').innerText;
 
-  // === 4. VALIDATION FINALE DU VOTE ===
-  if (formEtape2) {
-    formEtape2.addEventListener("submit", (e) => {
-      e.preventDefault();
-      // On bloque le vote car il n'y a pas de candidats pour l'instant
-      afficherMessage("Impossible de valider : aucun candidat n'est inscrit pour le moment.", "error");
-    });
-  }
+    // Enregistrer le vote
+    const { error: errVote } = await supabase
+        .from('votes')
+        .insert([{ candidat_id: candidatId, electeur_id: currentElecteurId }]);
+
+    if (errVote) {
+        alert("Erreur lors du vote : " + errVote.message);
+        return;
+    }
+
+    // Mettre à jour l'électeur (a_vote = true)
+    await supabase.from('electeurs').update({ a_vote: true }).eq('id', currentElecteurId);
+
+    document.getElementById('nom-confirmation').innerText = currentElecteurNom;
+    document.getElementById('candidat-confirmation').innerText = candidatNom;
+    afficherPage('page-confirmation');
+}
+
+// ==========================================
+// CÔTÉ ADMINISTRATEUR
+// ==========================================
+async function mettreAJourDashboard() {
+    // Compter les candidats
+    const { count: nbCandidats } = await supabase.from('candidats').select('*', { count: 'exact', head: true });
+    document.getElementById('stat-nb-candidats').innerText = nbCandidats || 0;
+
+    // Compter les votes
+    const { count: nbVotes } = await supabase.from('votes').select('*', { count: 'exact', head: true });
+    document.getElementById('stat-nb-votes').innerText = nbVotes || 0;
+
+    // Lister les candidats
+    const { data: candidats } = await supabase.from('candidats').select('*');
+    const listeDiv = document.getElementById('admin-liste-candidats');
+    if (candidats && candidats.length > 0) {
+        listeDiv.innerHTML = candidats.map(c => 
+            `<div style="padding: 8px; border-bottom: 1px solid #eee;">
+                <strong>${c.nom_prenom}</strong> - ${c.profession}
+            </div>`
+        ).join('');
+    } else {
+        listeDiv.innerHTML = "<p>Aucun candidat.</p>";
+    }
+}
+
+async function ajouterCandidat(event) {
+    event.preventDefault();
+    const nom = document.getElementById('cand-nom').value;
+    const profession = document.getElementById('cand-profession').value;
+    const programme = document.getElementById('cand-programme').value;
+    const ambition = document.getElementById('cand-ambition').value;
+    const photo_url = document.getElementById('cand-photo').value;
+
+    const { error } = await supabase.from('candidats').insert([{ 
+        nom_prenom: nom, 
+        profession: profession, 
+        programme: programme, 
+        ambition: ambition,
+        photo_url: photo_url
+    }]);
+
+    if (error) {
+        alert("Erreur : " + error.message);
+    } else {
+        alert("Candidat ajouté !");
+        document.getElementById('form-candidat').reset();
+        afficherPage('page-admin-dashboard');
+        mettreAJourDashboard();
+    }
+}
+
+async function voirElecteurs() {
+    afficherPage('page-admin-electeurs');
+    const { data: electeurs, error } = await supabase.from('electeurs').select('*');
+    const div = document.getElementById('admin-liste-electeurs');
+    
+    if (error || !electeurs || electeurs.length === 0) {
+        div.innerHTML = "<p>Aucun électeur inscrit.</p>";
+        return;
+    }
+
+    div.innerHTML = electeurs.map(e => 
+        `<div style="padding: 10px; border-bottom: 1px solid #eee;">
+            <strong>${e.nom_prenom}</strong><br>
+            Pièce: ${e.type_piece} - N° ${e.numero_piece}<br>
+            A voté: ${e.a_vote ? '✅ Oui' : '❌ Non'}
+        </div>`
+    ).join('');
+}
+
+// ==========================================
+// INITIALISATION AU CHARGEMENT DE LA PAGE
+// ==========================================
+document.addEventListener('DOMContentLoaded', () => {
+    // Si on est sur index.html
+    if (document.getElementById('page-accueil')) {
+        verifierStatutScrutin();
+        setInterval(verifierStatutScrutin, 60000);
+    }
+    // Si on est sur admin.html
+    if (document.getElementById('page-admin-dashboard')) {
+        mettreAJourDashboard();
+    }
 });
-        
