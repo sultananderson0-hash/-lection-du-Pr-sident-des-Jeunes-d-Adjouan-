@@ -3,58 +3,57 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Administration - Élections 2026</title>
+  <title>Admin - Élections Jeunesse d'Adjouan</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    * { box-sizing: border-box; font-family: Arial, sans-serif; }
-    body { background-color: #f4f6f9; margin: 0; padding: 20px; color: #333; }
-    .container { max-width: 900px; margin: 0 auto; }
-    h1, h2 { text-align: center; color: #1a365d; }
-    .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; margin: 0; padding: 15px; color: #1c1e21; }
+    .container { max-width: 600px; margin: 0 auto; }
+    .card { background: #ffffff; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    h2 { color: #004d40; margin-top: 0; font-size: 1.2rem; display: flex; align-items: center; gap: 8px; }
     .form-group { margin-bottom: 15px; }
-    label { display: block; margin-bottom: 5px; font-weight: bold; }
-    input[type="text"], input[type="file"], textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
-    button { background-color: #2b6cb0; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; }
-    button:hover { background-color: #2c5282; }
-    button:disabled { background-color: #a0aec0; cursor: not-allowed; }
-    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-    th, td { border: 1px solid #e2e8f0; padding: 10px; text-align: left; }
-    th { background-color: #edf2f7; }
-    .btn-danger { background-color: #e53e3e; padding: 5px 10px; font-size: 0.9em; width: auto; }
-    .btn-danger:hover { background-color: #c53030; }
-    .img-preview { width: 50px; height: 50px; object-fit: cover; border-radius: 50%; }
+    label { display: block; font-weight: 600; margin-bottom: 5px; font-size: 0.9rem; color: #4b5563; }
+    input[type="text"], textarea, input[type="file"] { width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 8px; box-sizing: border-box; font-size: 0.95rem; }
+    button { background-color: #004d40; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; transition: background 0.2s; }
+    button:hover { background-color: #00332c; }
+    button:disabled { background-color: #9ca3af; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { padding: 10px; text-align: left; border-bottom: 1px solid #e5e7eb; font-size: 0.9rem; }
+    th { background-color: #f9fafb; color: #374151; }
+    .img-preview { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; }
+    .btn-danger { background-color: #dc2626; padding: 6px 10px; font-size: 0.8rem; width: auto; }
+    .btn-danger:hover { background-color: #b91c1c; }
+    .badge { background: #e0f2fe; color: #0369a1; padding: 3px 8px; border-radius: 12px; font-size: 0.8rem; font-weight: 600; }
   </style>
 </head>
 <body>
 
 <div class="container">
-  <h1>⚙️️ Panneau d'Administration</h1>
-
+  
   <!-- RÉSULTATS -->
   <div class="card">
-    <h2>📊 Résultats en direct</h2>
-    <div id="resultats-container">Chargement des résultats...</div>
-    <button onclick="chargerDonnees()" style="margin-top: 15px; background-color: #4a5568;">🔄 Rafraîchir les données</button>
+    <h2>🗳️ Résultats en direct</h2>
+    <div id="resultats-container">Chargement...</div>
+    <button onclick="chargerDonnees()" style="margin-top: 12px; background-color: #1e293b;">🔄 Rafraîchir les données</button>
   </div>
 
-  <!-- AJOUT DE CANDIDAT -->
+  <!-- AJOUTER UN CANDIDAT -->
   <div class="card">
     <h2>👥 Ajouter un Candidat</h2>
     <form id="form-candidat" onsubmit="ajouterCandidat(event)">
       <div class="form-group">
-        <label for="nom_candidat">Nom et Prénom :</label>
+        <label>Nom et Prénom :</label>
         <input type="text" id="nom_candidat" required placeholder="Ex: Kouamé N'diamoi Theodore">
       </div>
       <div class="form-group">
-        <label for="profession_candidat">Profession :</label>
-        <input type="text" id="profession_candidat" required placeholder="Ex: Enseignant">
+        <label>Profession :</label>
+        <input type="text" id="profession_candidat" required placeholder="Ex: Entrepreneur">
       </div>
       <div class="form-group">
-        <label for="ambition_candidat">Ambition / Message :</label>
-        <textarea id="ambition_candidat" rows="3" required placeholder="Ex: Développer les infrastructures locales..."></textarea>
+        <label>Ambition / Message :</label>
+        <textarea id="ambition_candidat" rows="3" required placeholder="Votre message aux jeunes..."></textarea>
       </div>
       <div class="form-group">
-        <label for="photo_candidat">Photo de profil :</label>
+        <label>Photo de profil :</label>
         <input type="file" id="photo_candidat" accept="image/*" required>
       </div>
       <button type="submit" id="btn-ajouter">➕ Enregistrer le candidat</button>
@@ -72,9 +71,7 @@
           <th>Action</th>
         </tr>
       </thead>
-      <tbody id="liste-candidats">
-        <!-- Rempli en JS -->
-      </tbody>
+      <tbody id="liste-candidats"></tbody>
     </table>
   </div>
 
@@ -85,48 +82,39 @@
       <thead>
         <tr>
           <th>Nom & Prénom</th>
-          <th>Type Pièce</th>
           <th>Pièce</th>
+          <th>Action</th>
         </tr>
       </thead>
-      <tbody id="liste-electeurs">
-        <!-- Rempli en JS -->
-      </tbody>
+      <tbody id="liste-electeurs"></tbody>
     </table>
   </div>
+
 </div>
 
 <script>
-  // CONFIGURATION SUPABASE (Remplace avec tes clés exactes si besoin)
-  const SUPABASE_URL = 'https://qktfqpsmqcrgtmauxvyk.supabase.co';
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrdGZxcHNtcGNyZ3RtYXV4dnlrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyNjM5ODcsImV4cCI6MjA1NjgzOTk4N30.K9vT3fXqX...'; 
+  // CLÉS SUPABASE
+  const SUPABASE_URL = 'https://qktfqpsqmcrgtmauntfj.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_45SBmGTiYtsCv5QEmYIovQ_WiAzSrCl';
 
   const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  // CHARGER TOUTES LES DONNÉES
   async function chargerDonnees() {
     await chargerCandidats();
     await chargerElecteurs();
     await chargerResultats();
   }
 
-  // 1. CHARGER LA LISTE DES CANDIDATS
   async function chargerCandidats() {
     const tbody = document.getElementById('liste-candidats');
     tbody.innerHTML = '';
-    
-    const { data: candidats, error } = await supabaseClient.from('candidats').select('*');
-    if (error) {
-      console.error(error);
-      return;
-    }
-
+    const { data: candidats } = await supabaseClient.from('candidats').select('*');
     if (candidats) {
       candidats.forEach(c => {
         tbody.innerHTML += `
           <tr>
             <td><img src="${c.photo_url}" class="img-preview" alt="${c.nom_prenom}"></td>
-            <td><strong>${c.nom_prenom}</strong><br><small>${c.profession}</small></td>
+            <td><strong>${c.nom_prenom}</strong><br><small style="color:#6b7280">${c.profession}</small></td>
             <td><button class="btn-danger" onclick="supprimerCandidat('${c.id}')">Supprimer</button></td>
           </tr>
         `;
@@ -134,7 +122,6 @@
     }
   }
 
-  // 2. AJOUTER UN CANDIDAT (SÉCURISÉ AVEC GETPUBLICURL)
   async function ajouterCandidat(e) {
     e.preventDefault();
     const nom = document.getElementById('nom_candidat').value;
@@ -156,21 +143,18 @@
       const fileExt = file.name.split('.').pop();
       const fileName = `candidat_${Date.now()}.${fileExt}`;
 
-      // Envoi de l'image
       const { error: uploadError } = await supabaseClient.storage
         .from('pieces_identite')
         .upload(fileName, file);
 
       if (uploadError) throw uploadError;
 
-      // Récupération de l'URL publique générée automatiquement par Supabase
       const { data: urlData } = supabaseClient.storage
         .from('pieces_identite')
         .getPublicUrl(fileName);
 
       const photoUrl = urlData.publicUrl;
 
-      // Insertion en base de données
       const { error: insertError } = await supabaseClient.from('candidats').insert([{
         nom_prenom: nom,
         profession: profession,
@@ -180,7 +164,6 @@
 
       if (insertError) throw insertError;
 
-      // Nettoyage du formulaire
       document.getElementById('nom_candidat').value = '';
       document.getElementById('profession_candidat').value = '';
       document.getElementById('ambition_candidat').value = '';
@@ -195,20 +178,17 @@
     }
   }
 
-  // 3. SUPPRIMER UN CANDIDAT
   async function supprimerCandidat(id) {
-    if (confirm("Voulez-vous vraiment supprimer ce candidat ?")) {
+    if (confirm("Supprimer ce candidat ?")) {
       await supabaseClient.from('candidats').delete().eq('id', id);
       chargerDonnees();
     }
   }
 
-  // 4. CHARGER LES ÉLECTEURS
   async function chargerElecteurs() {
     const tbody = document.getElementById('liste-electeurs');
     const totalSpan = document.getElementById('total-electeurs');
     tbody.innerHTML = '';
-
     const { data: electeurs } = await supabaseClient.from('electeurs').select('*');
     if (electeurs) {
       totalSpan.textContent = electeurs.length;
@@ -217,21 +197,20 @@
           <tr>
             <td>${e.nom_prenom}</td>
             <td><span class="badge">${e.type_piece}</span></td>
-            <td><a href="${e.numero_piece}" target="_blank">Voir pièce</a></td>
+            <td><a href="${e.numero_piece}" target="_blank" style="color:#004d40;font-weight:bold;">Voir</a></td>
           </tr>
         `;
       });
     }
   }
 
-  // 5. CHARGER LES RÉSULTATS
   async function chargerResultats() {
     const container = document.getElementById('resultats-container');
     const { data: votes } = await supabaseClient.from('votes').select('*');
     const { data: candidats } = await supabaseClient.from('candidats').select('*');
 
     if (!candidats || candidats.length === 0) {
-      container.innerHTML = '<p>Aucun candidat enregistré.</p>';
+      container.innerHTML = '<p style="color:#6b7280;">Aucun candidat enregistré.</p>';
       return;
     }
 
@@ -244,19 +223,17 @@
       });
     }
 
-    let html = '<table><thead><tr><th>Candidat</th><th>Nombre de Voix</th></tr></thead><tbody>';
+    let html = '<table><thead><tr><th>Candidat</th><th>Voix</th></tr></thead><tbody>';
     Object.values(decompte).forEach(c => {
-      html += `<tr><td><strong>${c.nom}</strong></td><td>${c.voix} voix</td></tr>`;
+      html += `<tr><td><strong>${c.nom}</strong></td><td><span class="badge">${c.voix} voix</span></td></tr>`;
     });
     html += '</tbody></table>';
 
     container.innerHTML = html;
   }
 
-  // Lancement initial
   chargerDonnees();
 </script>
 
 </body>
 </html>
-        
