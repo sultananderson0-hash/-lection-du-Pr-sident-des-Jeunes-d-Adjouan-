@@ -3,18 +3,14 @@
 // ==========================================
 const SUPABASE_URL = 'https://qktfqpsqmcrgtmauntfj.supabase.co'; 
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrdGZxcHNxbWNyZ3RtYXVudGZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA5NzU1MDEsImV4cCI6MjEwNjU1MTUwMX0.sugP-f143yDuyUzY8FHZqTS-YuuM3JcGX4tLz2N_kuI'; 
-// ⚠️ IMPORTANT : Remplacez la ligne ci-dessus par VOTRE clé anon complète.
-// Je ne peux pas voir la fin de votre clé sur la capture, donc j'ai mis une clé fictive.
-// Copiez votre vraie clé "anon public" depuis Supabase (Settings > API).
 
 const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Variables globales
 let currentElecteurId = null;
 let currentElecteurNom = null;
 
 // ==========================================
-// FONCTIONS DE NAVIGATION
+// NAVIGATION
 // ==========================================
 function afficherPage(idPage) {
     document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
@@ -26,13 +22,9 @@ function afficherPage(idPage) {
 }
 
 // ==========================================
-// GESTION DU SCRUTIN (TEMPS)
+// GESTION DU SCRUTIN (DATES DE TEST)
 // ==========================================
-// ⚠️ DATES DE TEST (Le vote est ouvert pour vos tests)
-// Pour la mise en ligne finale, remplacez par :
-// const DATE_OUVERTURE = new Date("2026-10-11T08:00:00");
-// const DATE_FERMETURE = new Date("2026-10-11T18:00:00");
-
+// ⚠️ DATES DE TEST - Le vote est ouvert
 const DATE_OUVERTURE = new Date("2026-01-01T08:00:00"); 
 const DATE_FERMETURE = new Date("2026-12-31T18:00:00");
 
@@ -42,7 +34,7 @@ function verifierStatutScrutin() {
     const badge = document.getElementById('badge-statut');
     const msg = document.getElementById('message-statut');
 
-    if(!btnVoter) return; // Si on est sur la page admin
+    if(!btnVoter) return;
 
     if (maintenant < DATE_OUVERTURE) {
         badge.className = "status-badge status-waiting";
@@ -78,7 +70,7 @@ function verifierOuverture() {
 }
 
 // ==========================================
-// CÔTÉ ÉLECTEUR (INSCRIPTION ET VOTE)
+// ÉLECTEUR
 // ==========================================
 async function validerInscription(event) {
     event.preventDefault();
@@ -87,8 +79,7 @@ async function validerInscription(event) {
     const type_piece = document.getElementById('type_piece').value;
     const numero_piece = document.getElementById('numero_piece').value;
 
-    // Vérifier si l'électeur existe déjà (par numéro de pièce)
-    const { data: existant, error: errCheck } = await supabase
+    const { data: existant } = await supabase
         .from('electeurs')
         .select('*')
         .eq('numero_piece', numero_piece)
@@ -99,7 +90,6 @@ async function validerInscription(event) {
         return;
     }
 
-    // Insérer le nouvel électeur
     const { data, error } = await supabase
         .from('electeurs')
         .insert([{ 
@@ -117,7 +107,6 @@ async function validerInscription(event) {
         return;
     }
 
-    // Sauvegarder l'ID de l'électeur pour le vote
     currentElecteurId = data[0].id;
     currentElecteurNom = data[0].nom_prenom;
 
@@ -169,7 +158,6 @@ async function validerVote(event) {
     const candidatId = candidatSelectionne.value;
     const candidatNom = candidatSelectionne.closest('.candidat-card').querySelector('.candidat-nom').innerText;
 
-    // Enregistrer le vote
     const { error: errVote } = await supabase
         .from('votes')
         .insert([{ candidat_id: candidatId, electeur_id: currentElecteurId }]);
@@ -179,7 +167,6 @@ async function validerVote(event) {
         return;
     }
 
-    // Mettre à jour l'électeur (a_vote = true)
     await supabase.from('electeurs').update({ a_vote: true }).eq('id', currentElecteurId);
 
     document.getElementById('nom-confirmation').innerText = currentElecteurNom;
@@ -188,18 +175,15 @@ async function validerVote(event) {
 }
 
 // ==========================================
-// CÔTÉ ADMINISTRATEUR
+// ADMIN
 // ==========================================
 async function mettreAJourDashboard() {
-    // Compter les candidats
     const { count: nbCandidats } = await supabase.from('candidats').select('*', { count: 'exact', head: true });
     document.getElementById('stat-nb-candidats').innerText = nbCandidats || 0;
 
-    // Compter les votes
     const { count: nbVotes } = await supabase.from('votes').select('*', { count: 'exact', head: true });
     document.getElementById('stat-nb-votes').innerText = nbVotes || 0;
 
-    // Lister les candidats
     const { data: candidats } = await supabase.from('candidats').select('*');
     const listeDiv = document.getElementById('admin-liste-candidats');
     if (candidats && candidats.length > 0) {
@@ -259,15 +243,13 @@ async function voirElecteurs() {
 }
 
 // ==========================================
-// INITIALISATION AU CHARGEMENT DE LA PAGE
+// INITIALISATION
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
-    // Si on est sur index.html
     if (document.getElementById('page-accueil')) {
         verifierStatutScrutin();
         setInterval(verifierStatutScrutin, 60000);
     }
-    // Si on est sur admin.html
     if (document.getElementById('page-admin-dashboard')) {
         mettreAJourDashboard();
     }
