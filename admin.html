@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Élection Adjouan</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header class="header">
+        <a class="admin-link" href="index.html" title="Retour au site public">🏠</a>
+        <h1>Élection du Président des Jeunes d'Adjouan</h1>
+        <p>Espace Administrateur — 2026</p>
+    </header>
+
+    <main class="container">
+
+        <!-- DASHBOARD -->
+        <div id="page-admin-dashboard" class="page active">
+            <div class="card">
+                <h2>📊 Tableau de bord</h2>
+                <div id="admin-alert" class="alert"></div>
+                <div class="stats-grid">
+                    <div class="stat-box"><h3>Candidats</h3><p id="stat-nb-candidats">0</p></div>
+                    <div class="stat-box"><h3>Votes</h3><p id="stat-nb-votes">0</p></div>
+                </div>
+                <h3 style="font-size: 16px; margin-bottom: 10px;">Liste des candidats</h3>
+                <div id="admin-liste-candidats" style="font-size: 14px; color: #555;"></div>
+                <button class="btn btn-primary" onclick="afficherPage('page-admin-ajout')" style="margin-top: 20px;">➕ Ajouter un candidat</button>
+                <button class="btn btn-secondary" onclick="voirElecteurs()" style="margin-top: 10px;">👥 Voir les électeurs</button>
+            </div>
+        </div>
+
+        <!-- AJOUT CANDIDAT -->
+        <div id="page-admin-ajout" class="page">
+            <div class="card">
+                <h2>➕ Ajouter un candidat</h2>
+                <form id="form-candidat" onsubmit="ajouterCandidat(event)">
+                    <div class="form-group"><label>Nom *</label><input type="text" id="cand-nom" required></div>
+                    <div class="form-group"><label>Profession *</label><input type="text" id="cand-profession" required></div>
+                    <div class="form-group"><label>Programme *</label><textarea id="cand-programme" required></textarea></div>
+                    <div class="form-group"><label>Ambition *</label><textarea id="cand-ambition" required></textarea></div>
+                    <div class="form-group"><label>Photo (URL) *</label><input type="url" id="cand-photo" required placeholder="https://..."></div>
+                    <button type="submit" class="btn btn-primary" id="btn-ajouter">Ajouter</button>
+                </form>
+                <button class="btn-retour" onclick="afficherPage('page-admin-dashboard')">← Retour</button>
+            </div>
+        </div>
+
+        <!-- LISTE ÉLECTEURS -->
+        <div id="page-admin-electeurs" class="page">
+            <div class="card">
+                <h2>👥 Liste des électeurs</h2>
+                <div id="admin-liste-electeurs" style="font-size: 14px;"></div>
+                <button class="btn-retour" onclick="afficherPage('page-admin-dashboard')">← Retour</button>
+            </div>
+        </div>
+
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="script.js"></script>
+</body>
+</html>
