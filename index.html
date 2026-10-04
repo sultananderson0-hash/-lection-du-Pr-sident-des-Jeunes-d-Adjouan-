@@ -120,7 +120,174 @@
 
     </main>
 
+    <!-- Chargement de Supabase (obligatoire) -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="script.js"></script>
+
+    <!-- Le script est maintenant directement ici pour éviter les problèmes de chargement -->
+    <script>
+    // ==========================================
+    // CONFIGURATION SUPABASE
+    // ==========================================
+    const SUPABASE_URL = 'https://qktfqpsqmcrgtmauntfj.supabase.co'; 
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrdGZxcHNxbWNyZ3RtYXVudGZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA5NzU1MDEsImV4cCI6MjEwNjU1MTUwMX0.sugP-f143yDuyUzY8FHZqTS-YuuM3JcGX4tLz2N_kuI'; 
+
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let currentElecteurId = null;
+    let currentElecteurNom = null;
+
+    // ==========================================
+    // NAVIGATION
+    // ==========================================
+    function afficherPage(idPage) {
+        document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+        const pageActive = document.getElementById(idPage);
+        if (pageActive) {
+            pageActive.classList.add('active');
+            window.scrollTo(0, 0);
+        }
+    }
+
+    // ==========================================
+    // MODE TEST : LE VOTE EST TOUJOURS OUVERT
+    // ==========================================
+    function verifierStatutScrutin() {
+        const btnVoter = document.getElementById('btn-voter');
+        const badge = document.getElementById('badge-statut');
+        const msg = document.getElementById('message-statut');
+
+        if(!btnVoter) return;
+
+        badge.className = "status-badge status-open";
+        badge.innerText = "✅ Scrutin ouvert (TEST)";
+        msg.innerText = "Le vote est en cours. Phase de test.";
+        btnVoter.disabled = false;
+        btnVoter.innerText = "🗳️ Je veux voter";
+        btnVoter.style.opacity = "1";
+        btnVoter.style.cursor = "pointer";
+    }
+
+    function verifierOuverture() {
+        alert("Le bouton a été cliqué !");
+        afficherPage('page-inscription');
+    }
+
+    // ==========================================
+    // ÉLECTEUR : INSCRIPTION
+    // ==========================================
+    async function validerInscription(event) {
+        event.preventDefault();
+        const nom = document.getElementById('nom').value;
+        const date_naissance = document.getElementById('date_naissance').value;
+        const type_piece = document.getElementById('type_piece').value;
+        const numero_piece = document.getElementById('numero_piece').value;
+
+        const { data: existant } = await supabase
+            .from('electeurs')
+            .select('*')
+            .eq('numero_piece', numero_piece)
+            .single();
+
+        if (existant) {
+            alert("Cet électeur est déjà inscrit !");
+            return;
+        }
+
+        const { data, error } = await supabase
+            .from('electeurs')
+            .insert([{ 
+                nom_prenom: nom, 
+                date_naissance: date_naissance, 
+                type_piece: type_piece, 
+                numero_piece: numero_piece,
+                est_verifie: false,
+                a_vote: false
+            }])
+            .select();
+
+        if (error) {
+            alert("Erreur lors de l'inscription : " + error.message);
+            return;
+        }
+
+        currentElecteurId = data[0].id;
+        currentElecteurNom = data[0].nom_prenom;
+
+        document.getElementById('message-bienvenue').innerText = `Bienvenue ${nom}, veuillez choisir votre candidat.`;
+        afficherPage('page-vote');
+        chargerCandidatsPourVote();
+    }
+
+    // ==========================================
+    // ÉLECTEUR : VOTE
+    // ==========================================
+    async function chargerCandidatsPourVote() {
+        const container = document.getElementById('liste-candidats');
+        container.innerHTML = '<p>Chargement des candidats...</p>';
+
+        const { data: candidats, error } = await supabase.from('candidats').select('*');
+
+        if (error || !candidats || candidats.length === 0) {
+            container.innerHTML = '<p style="color:red;">Aucun candidat n\'a été enregistré.</p>';
+            return;
+        }
+
+        container.innerHTML = '';
+        candidats.forEach((cand) => {
+            const div = document.createElement('label');
+            div.className = 'candidat-card';
+            div.innerHTML = `
+                <input type="radio" name="candidat" value="${cand.id}" required style="display:none;">
+                <img src="${cand.photo_url}" alt="${cand.nom_prenom}" class="candidat-photo">
+                <div class="candidat-nom">${cand.nom_prenom}</div>
+                <div class="candidat-info">${cand.profession}</div>
+                <div class="candidat-message">"${cand.programme}"</div>
+            `;
+            div.addEventListener('click', () => {
+                document.querySelectorAll('.candidat-card').forEach(c => c.classList.remove('selected'));
+                div.classList.add('selected');
+                div.querySelector('input[type="radio"]').checked = true;
+            });
+            container.appendChild(div);
+        });
+    }
+
+    async function validerVote(event) {
+        event.preventDefault();
+        const candidatSelectionne = document.querySelector('input[name="candidat"]:checked');
+        
+        if (!candidatSelectionne) {
+            alert("Veuillez sélectionner un candidat.");
+            return;
+        }
+
+        const candidatId = candidatSelectionne.value;
+        const candidatNom = candidatSelectionne.closest('.candidat-card').querySelector('.candidat-nom').innerText;
+
+        const { error: errVote } = await supabase
+            .from('votes')
+            .insert([{ candidat_id: candidatId, electeur_id: currentElecteurId }]);
+
+        if (errVote) {
+            alert("Erreur lors du vote : " + errVote.message);
+            return;
+        }
+
+        await supabase.from('electeurs').update({ a_vote: true }).eq('id', currentElecteurId);
+
+        document.getElementById('nom-confirmation').innerText = currentElecteurNom;
+        document.getElementById('candidat-confirmation').innerText = candidatNom;
+        afficherPage('page-confirmation');
+    }
+
+    // ==========================================
+    // INITIALISATION
+    // ==========================================
+    document.addEventListener('DOMContentLoaded', () => {
+        if (document.getElementById('page-accueil')) {
+            verifierStatutScrutin();
+        }
+    });
+    </script>
 </body>
 </html>
